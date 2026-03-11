@@ -5,6 +5,10 @@
 @import "./reference-sections.css";
 
 @layer base {
+  :root {
+    --app-zoom: 0.8;
+  }
+
   * {
     @apply border-border;
   }
@@ -19,6 +23,7 @@
     height: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    zoom: var(--app-zoom);
   }
 
   body {
@@ -36,6 +41,14 @@
   body::-webkit-scrollbar,
   *::-webkit-scrollbar {
     display: none;
+  }
+
+  @supports not (zoom: 1) {
+    body {
+      transform: scale(var(--app-zoom));
+      transform-origin: top left;
+      width: calc(100% / var(--app-zoom));
+    }
   }
 
   :root {

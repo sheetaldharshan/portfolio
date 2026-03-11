@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Bell, BellOff, Paperclip, Send, X } from "lucide-react";
 
@@ -62,6 +62,7 @@ export default function AdminChatPage() {
   const [loadingConversations, setLoadingConversations] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [isPushEnabled, setIsPushEnabled] = useState(false);
+  const messagesScrollRef = useRef<HTMLDivElement>(null);
 
   const activeConversation = useMemo(
     () => conversations.find((item) => item.id === activeConversationId) || null,
@@ -155,6 +156,16 @@ export default function AdminChatPage() {
 
     return () => window.clearInterval(id);
   }, [activeConversationId, fetchMessages]);
+
+  useEffect(() => {
+    const container = messagesScrollRef.current;
+    if (!container) return;
+
+    container.scrollTo({
+      top: container.scrollHeight,
+      behavior: "smooth",
+    });
+  }, [activeConversationId, messages]);
 
   const handleSaveOperatorKey = () => {
     const trimmed = draftKey.trim();
@@ -290,8 +301,8 @@ export default function AdminChatPage() {
 
   return (
     <main className="flex min-h-screen flex-col bg-background">
-      <div className="flex-1 px-4 pb-10 pt-24 md:px-8">
-        <div className="mx-auto max-w-7xl">
+      <div className="flex-1 px-4 pb-6 pt-24 md:px-8 md:pb-8">
+        <div className="mx-auto flex h-[calc(100svh-7.5rem)] max-w-7xl flex-col">
           <div className="mb-5 rounded-2xl border border-foreground/10 bg-foreground/[0.02] p-4">
             <h1 className="text-xl font-semibold text-foreground">Assistant Operator Inbox</h1>
             <p className="mt-1 text-xs text-foreground/55">
@@ -320,7 +331,7 @@ export default function AdminChatPage() {
             </div>
           </div>
 
-          <div className="grid h-[calc(100vh-280px)] grid-cols-1 gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
+          <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
             <aside className="flex min-h-0 flex-col rounded-2xl border border-foreground/10 bg-foreground/[0.02] p-2">
             <div className="mb-2 px-2 py-1 text-xs uppercase tracking-[0.14em] text-foreground/50">
               Conversations {loadingConversations ? "(loading)" : `(${conversations.length})`}
@@ -357,7 +368,7 @@ export default function AdminChatPage() {
             </div>
           </aside>
 
-          <section className="flex min-h-0 flex-col rounded-2xl border border-foreground/10 bg-foreground/[0.02]">
+          <section className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-foreground/10 bg-foreground/[0.02]">
             {activeConversation ? (
               <>
                 <div className="border-b border-foreground/10 px-4 py-3">
@@ -408,7 +419,7 @@ export default function AdminChatPage() {
 
             {activeConversation && (
               <>
-                <div className="min-h-0 flex-1 space-y-2 overflow-y-auto px-4 py-4">
+                <div ref={messagesScrollRef} className="min-h-0 flex-1 space-y-2 overflow-y-auto px-4 py-4">
                   {loadingMessages && <p className="text-xs text-foreground/50">Loading messages...</p>}
                   {!loadingMessages && messages.length === 0 && <p className="text-xs text-foreground/45">No messages in this thread.</p>}
                   {messages.map((message) => {
@@ -459,7 +470,7 @@ export default function AdminChatPage() {
             )}
 
             {activeConversation && (
-              <div className="border-t border-foreground/10 p-3">
+              <div className="border-t border-foreground/10 bg-background/45 p-3 backdrop-blur-sm">
               <p className="mb-2 text-[11px] text-foreground/45">
                 Use hidden navigation tags like [[open:/blog]], [[open:/hire-me]], or [[scroll:projects]] to move the visitor without showing the tag in chat.
               </p>
