@@ -30,10 +30,9 @@ type Conversation = {
   status: "ai_active" | "human_takeover" | "resolved";
 };
 
-type AssistantIntentTarget = {
+type NavigationTarget = {
   kind: "section" | "route";
   value: string;
-  reply: string;
   notice: string;
 };
 
@@ -103,94 +102,9 @@ const playIncomingSound = () => {
   }
 };
 
-const intentTargets: Array<{ pattern: RegExp; target: AssistantIntentTarget }> = [
-  {
-    pattern: /\b(project|projects|portfolio|case study|case studies|build|built|show me your work)\b/i,
-    target: {
-      kind: "section",
-      value: "projects",
-      reply: "She has worked on multiple portfolio and client-focused builds that highlight real-world problem solving and product thinking.",
-      notice: "Opening projects...",
-    },
-  },
-  {
-    pattern: /\b(blog|blogs|post|posts|article|articles|writing|writings|interest|interests|read|reading)\b/i,
-    target: {
-      kind: "route",
-      value: "/blog",
-      reply: "She also shares ideas and written insights around development, digital work, and practical learnings.",
-      notice: "Opening blog...",
-    },
-  },
-  {
-    pattern: /\b(hire|contact|service|services|freelance|freelancer|collaborate|collaboration|quote|client work|get in touch)\b/i,
-    target: {
-      kind: "route",
-      value: "/hire-me",
-      reply: "If you are planning a project, she is available for collaboration and service-based engagements.",
-      notice: "Opening hire me...",
-    },
-  },
-  {
-    pattern: /\b(book|schedule|meeting|consultation|consult|call|appointment|discuss)\b/i,
-    target: {
-      kind: "route",
-      value: "/book-a-call",
-      reply: "You can directly schedule a discussion to talk through requirements, ideas, or timelines.",
-      notice: "Opening booking...",
-    },
-  },
-  {
-    pattern: /\b(about|background|story|journey|who are you|get to know|bio|myself|resume)\b/i,
-    target: {
-      kind: "route",
-      value: "/about",
-      reply: "Sheetal Dharshan is focused on building modern web experiences with a mix of technical depth, design clarity, and practical execution.",
-      notice: "Opening about...",
-    },
-  },
-  {
-    pattern: /\b(skill|skills|stack|tech stack|technology|technologies|tools|framework|frameworks)\b/i,
-    target: {
-      kind: "section",
-      value: "skills",
-      reply: "Her stack includes frontend, backend, and tooling skills used to ship complete products end-to-end.",
-      notice: "Opening skills...",
-    },
-  },
-  {
-    pattern: /\b(what do you do|what you do|services overview|offer|offers|what can you do)\b/i,
-    target: {
-      kind: "section",
-      value: "whatido",
-      reply: "She works across development, solution design, and execution support depending on project needs.",
-      notice: "Opening what I do...",
-    },
-  },
-  {
-    pattern: /\b(work|experience|career|employment|professional experience|resume work)\b/i,
-    target: {
-      kind: "route",
-      value: "/work",
-      reply: "Her work history reflects hands-on delivery across different types of digital and web initiatives.",
-      notice: "Opening work...",
-    },
-  },
-];
-
-const resolveIntentTarget = (value: string) => {
-  for (const intent of intentTargets) {
-    if (intent.pattern.test(value)) {
-      return intent.target;
-    }
-  }
-
-  return null;
-};
-
 const sanitizeMessageContent = (value: string) => value.replace(NAVIGATION_COMMAND_PATTERN, "").replace(/\s{2,}/g, " ").trim();
 
-const resolveCommandTarget = (value: string): AssistantIntentTarget | null => {
+const resolveCommandTarget = (value: string): NavigationTarget | null => {
   const regex = new RegExp(NAVIGATION_COMMAND_PATTERN.source, "gi");
   let latestMatch: RegExpExecArray | null = null;
   let currentMatch = regex.exec(value);
@@ -210,7 +124,6 @@ const resolveCommandTarget = (value: string): AssistantIntentTarget | null => {
     return {
       kind: "section",
       value: normalizedTarget.replace(/^#/, ""),
-      reply: "",
       notice: `Opening ${normalizedTarget.replace(/^#/, "")}...`,
     };
   }
@@ -219,7 +132,6 @@ const resolveCommandTarget = (value: string): AssistantIntentTarget | null => {
     return {
       kind: "section",
       value: normalizedTarget.slice(1),
-      reply: "",
       notice: `Opening ${normalizedTarget.slice(1)}...`,
     };
   }
@@ -227,24 +139,8 @@ const resolveCommandTarget = (value: string): AssistantIntentTarget | null => {
   return {
     kind: "route",
     value: normalizedTarget.startsWith("/") ? normalizedTarget : `/${normalizedTarget}`,
-    reply: "",
     notice: `Opening ${normalizedTarget.replace(/^\//, "")}...`,
   };
-};
-
-const classifyConfirmationFallback = (message: string) => {
-  const normalized = message.trim().toLowerCase();
-  if (!normalized) return "unclear" as const;
-
-  if (/(^|\b)(yes|yeah|yep|sure|okay|ok|go ahead|please do|do it|take me there|open it|move me|sounds good|why not)(\b|$)/i.test(normalized)) {
-    return "confirm" as const;
-  }
-
-  if (/(^|\b)(no|nope|nah|not now|stay here|don't|do not|leave it)(\b|$)/i.test(normalized)) {
-    return "reject" as const;
-  }
-
-  return "unclear" as const;
 };
 
 export const SiteAssistantWidget = () => {
@@ -265,7 +161,7 @@ export const SiteAssistantWidget = () => {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [isProfileConfirmed, setIsProfileConfirmed] = useState(false);
   const [navigationNotice, setNavigationNotice] = useState<string | null>(null);
-  const [pendingNavigationTarget, setPendingNavigationTarget] = useState<AssistantIntentTarget | null>(null);
+  const [pendingNavigationTarget, setPendingNavigationTarget] = useState<NavigationTarget | null>(null);
   const [widgetSize, setWidgetSize] = useState({ width: DEFAULT_WIDGET_WIDTH, height: DEFAULT_WIDGET_HEIGHT });
   const [isResizing, setIsResizing] = useState(false);
   const [resizeCursor, setResizeCursor] = useState<"nesw-resize" | "nwse-resize">("nesw-resize");
@@ -334,19 +230,6 @@ export const SiteAssistantWidget = () => {
     container.scrollTop = nextScrollTop;
   }, []);
 
-  const pushLocalAssistantMessage = useCallback((content: string) => {
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: `local-assistant-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        sender_role: "assistant",
-        sender_label: "SheetalDharshan Assistant",
-        content,
-        created_at: new Date().toISOString(),
-      },
-    ]);
-  }, []);
-
   const isLocalVisitorSynced = useCallback((localMessage: AssistantMessage, serverMessages: AssistantMessage[]) => {
     if (localMessage.sender_role !== "visitor") return false;
     const localContent = (localMessage.content || "").trim();
@@ -364,29 +247,47 @@ export const SiteAssistantWidget = () => {
     });
   }, []);
 
-  const classifyNavigationConfirmation = useCallback(async (message: string) => {
-    try {
-      const response = await fetch("/api/assistant/confirm-navigation", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message }),
-      });
+  const classifyConfirmationFallback = useCallback((message: string) => {
+    const normalized = message.trim().toLowerCase();
+    if (!normalized) return "unclear" as const;
 
-      if (!response.ok) {
+    if (/(^|\b)(yes|yeah|yep|sure|okay|ok|go ahead|please do|do it|take me there|open it|move me|sounds good|why not)(\b|$)/i.test(normalized)) {
+      return "confirm" as const;
+    }
+
+    if (/(^|\b)(no|nope|nah|not now|stay here|don't|do not|leave it)(\b|$)/i.test(normalized)) {
+      return "reject" as const;
+    }
+
+    return "unclear" as const;
+  }, []);
+
+  const classifyNavigationConfirmation = useCallback(
+    async (message: string) => {
+      try {
+        const response = await fetch("/api/assistant/confirm-navigation", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message }),
+        });
+
+        if (!response.ok) {
+          return classifyConfirmationFallback(message);
+        }
+
+        const data = await response.json();
+        const decision = String(data?.decision || "unclear").toLowerCase();
+        if (decision === "confirm" || decision === "reject" || decision === "unclear") {
+          return decision;
+        }
+
+        return classifyConfirmationFallback(message);
+      } catch {
         return classifyConfirmationFallback(message);
       }
-
-      const data = await response.json();
-      const decision = String(data?.decision || "unclear").toLowerCase();
-      if (decision === "confirm" || decision === "reject" || decision === "unclear") {
-        return decision;
-      }
-
-      return classifyConfirmationFallback(message);
-    } catch {
-      return classifyConfirmationFallback(message);
-    }
-  }, []);
+    },
+    [classifyConfirmationFallback]
+  );
 
   const jumpToSection = useCallback((sectionId: string) => {
     if (typeof window === "undefined") return;
@@ -401,7 +302,7 @@ export const SiteAssistantWidget = () => {
   }, []);
 
   const navigateForIntent = useCallback(
-    (target: AssistantIntentTarget) => {
+    (target: NavigationTarget) => {
       setNavigationNotice(target.notice);
 
       if (target.kind === "route") {
@@ -462,13 +363,16 @@ export const SiteAssistantWidget = () => {
           }
         }
 
+        const latestAssistantMessage = [...nextMessages].reverse().find((message) => message.sender_role === "assistant");
+        if (latestAssistantMessage) {
+          const assistantIntent = resolveCommandTarget(latestAssistantMessage.content || "");
+          if (assistantIntent) {
+            setPendingNavigationTarget(assistantIntent);
+          }
+        }
+
         setMessages((prev) => {
-          const localTransient = prev.filter(
-            (item) =>
-              item.id.startsWith("local-assistant-") ||
-              item.id.startsWith("local-system-") ||
-              item.id.startsWith("local-visitor-")
-          );
+          const localTransient = prev.filter((item) => item.id.startsWith("local-visitor-"));
 
           if (localTransient.length === 0) {
             return [...nextMessages].sort(byCreatedAtAsc);
@@ -735,20 +639,8 @@ export const SiteAssistantWidget = () => {
         setPendingNavigationTarget(null);
         shouldSkipAiResponse = true;
       } else if (decision === "reject") {
-        pushLocalAssistantMessage("Okay, I will stay on this page. If you want later, just ask me again.");
-        setPendingNavigationTarget(null);
-        return;
-      } else {
         setPendingNavigationTarget(null);
       }
-    }
-
-    const matchedIntent = pendingAttachments.length === 0 ? resolveIntentTarget(trimmedContent) : null;
-    if (matchedIntent) {
-      setPendingNavigationTarget(matchedIntent);
-      const targetLabel = matchedIntent.kind === "section" ? "section" : "page";
-      pushLocalAssistantMessage(`${matchedIntent.reply} If you need, I can move you to that ${targetLabel}.`);
-      shouldSkipAiResponse = true;
     }
 
     setIsSending(true);
@@ -776,11 +668,9 @@ export const SiteAssistantWidget = () => {
           return [...prev.filter((item) => item.id !== optimisticVisitorMessage.id), ...persistedMessages].sort(byCreatedAtAsc);
         });
         setPendingAttachments([]);
-      } else {
-        pushLocalAssistantMessage("I am syncing that message now. If the response is delayed, it will appear shortly.");
       }
     } catch {
-      pushLocalAssistantMessage("Network seems slow right now. Your message is kept and will sync automatically.");
+      // Keep optimistic message visible while polling sync catches up.
     } finally {
       setIsSending(false);
     }

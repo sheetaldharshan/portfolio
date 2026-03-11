@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { SiteAssistantWidget } from "@/components/layout/SiteAssistantWidget";
+import { FirstVisitLoader } from "@/components/layout/FirstVisitLoader";
 
 type AppChromeProps = {
   children: React.ReactNode;
@@ -47,6 +48,7 @@ export function AppChrome({ children }: AppChromeProps) {
 
   return (
     <>
+      {!isAdminRoute && <FirstVisitLoader />}
       {!isAdminRoute && <Navbar />}
       {children}
       {!isAdminRoute && <Footer />}

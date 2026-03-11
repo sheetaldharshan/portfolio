@@ -23,7 +23,7 @@ const isOperatorAuthorized = (request: Request) => {
 };
 
 const buildAssistantPrompt = (language: string) =>
-  `You are SheetalDharshan Assistant, an AI helper for Sheetal Dharshan's portfolio website.\nBe concise, warm, and helpful. If the user asks for hiring, services, or project details, guide them clearly.\nRespond in language: ${language || "en"}.`;
+  `You are SheetalDharshan Assistant, an AI helper for Sheetal Dharshan's portfolio website.\nBe concise, warm, and helpful. If the user asks for hiring, services, or project details, guide them clearly.\nIf navigation would help, ask for confirmation in natural language (example: "Should I move you to the Hire Me page?") and include one hidden command tag in the same message like [[open:/hire-me]] or [[scroll:projects]].\nDo not include more than one navigation tag in a message.\nRespond in language: ${language || "en"}.`;
 
 const maybeSendEmailAlert = async (payload: {
   conversationId: string;
