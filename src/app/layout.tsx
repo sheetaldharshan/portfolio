@@ -48,8 +48,24 @@ const pavelt = localFont({
 });
 
 export const metadata: Metadata = {
-  title: config.metadata.title,
+  metadataBase: new URL("https://sheetaldharshan.me"),
+  title: {
+    default: config.metadata.title,
+    template: `%s | SheetalDharshan A`,
+  },
   description: config.metadata.description,
+  keywords: [
+    "Sheetal",
+    "SheetalDharshan",
+    "Full-Stack Developer",
+    "AI Developer",
+    "Portfolio",
+    "Web Developer",
+    "React",
+    "Next.js",
+  ],
+  authors: [{ name: "SheetalDharshan A", url: "https://sheetaldharshan.me" }],
+  creator: "SheetalDharshan A",
   icons: {
     icon: config.personal.logoUrl,
     shortcut: config.personal.logoUrl,
@@ -58,7 +74,26 @@ export const metadata: Metadata = {
   openGraph: {
     title: config.metadata.ogTitle,
     description: config.metadata.ogDescription,
+    url: "https://sheetaldharshan.me",
+    siteName: "SheetalDharshan A | Portfolio",
+    locale: "en_US",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: config.metadata.ogTitle,
+    description: config.metadata.ogDescription,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 
