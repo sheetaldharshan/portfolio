@@ -965,43 +965,69 @@ export const SiteAssistantWidget = () => {
                   )}
                   {messages.map((message) => {
                     const isVisitor = message.sender_role === "visitor";
+                    const isOperatorMessage = message.sender_role === "operator";
                     const displayContent = sanitizeMessageContent(message.content || "");
                     return (
                       <div key={message.id} className={cn("flex w-full", isVisitor ? "justify-end" : "justify-start")}>
-                        <div
-                          className={cn(
-                            "max-w-[85%] rounded-2xl px-3 py-2 text-[13px]",
-                            isVisitor
-                              ? "rounded-br-md bg-foreground text-background"
-                              : "rounded-bl-md border border-foreground/10 bg-foreground/[0.03] text-foreground"
-                          )}
-                        >
-                          {!isVisitor && <p className="mb-1 text-[10px] uppercase tracking-[0.14em] text-foreground/45">{message.sender_label}</p>}
-                          {displayContent && <p className="whitespace-pre-wrap leading-5">{displayContent}</p>}
-                          {Array.isArray(message.attachments) && message.attachments.length > 0 && (
-                            <div className="mt-2 space-y-1.5">
-                              {message.attachments.map((attachment) => (
-                                <a
-                                  key={`${message.id}-${attachment.url}`}
-                                  href={attachment.url}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className={cn(
-                                    "block rounded-xl border px-2.5 py-1.5 text-xs",
-                                    isVisitor
-                                      ? "border-background/25 bg-background/10 text-background"
-                                      : "border-foreground/15 bg-background/40 text-foreground"
-                                  )}
-                                >
-                                  {attachment.name}
-                                </a>
-                              ))}
+                        {isOperatorMessage ? (
+                          <div className="max-w-[85%] rounded-2xl rounded-bl-md bg-gradient-to-r from-fuchsia-500/85 via-violet-500/85 to-cyan-500/85 p-[1px] shadow-[0_10px_24px_rgba(139,92,246,0.22)]">
+                            <div className="rounded-2xl rounded-bl-md bg-background px-3 py-2 text-[13px] text-foreground">
+                              <p className="mb-1 text-[10px] uppercase tracking-[0.14em] text-foreground/45">{message.sender_label}</p>
+                              {displayContent && <p className="whitespace-pre-wrap leading-5">{displayContent}</p>}
+                              {Array.isArray(message.attachments) && message.attachments.length > 0 && (
+                                <div className="mt-2 space-y-1.5">
+                                  {message.attachments.map((attachment) => (
+                                    <a
+                                      key={`${message.id}-${attachment.url}`}
+                                      href={attachment.url}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="block rounded-xl border border-foreground/15 bg-background/40 px-2.5 py-1.5 text-xs text-foreground"
+                                    >
+                                      {attachment.name}
+                                    </a>
+                                  ))}
+                                </div>
+                              )}
+                              <p className="mt-1 text-[10px] text-foreground/45">{safeFormatTime(message.created_at)}</p>
                             </div>
-                          )}
-                          <p className={cn("mt-1 text-[10px]", isVisitor ? "text-background/65" : "text-foreground/45")}>
-                            {safeFormatTime(message.created_at)}
-                          </p>
-                        </div>
+                          </div>
+                        ) : (
+                          <div
+                            className={cn(
+                              "max-w-[85%] rounded-2xl px-3 py-2 text-[13px]",
+                              isVisitor
+                                ? "rounded-br-md bg-foreground text-background"
+                                : "rounded-bl-md border border-foreground/10 bg-foreground/[0.03] text-foreground"
+                            )}
+                          >
+                            {!isVisitor && <p className="mb-1 text-[10px] uppercase tracking-[0.14em] text-foreground/45">{message.sender_label}</p>}
+                            {displayContent && <p className="whitespace-pre-wrap leading-5">{displayContent}</p>}
+                            {Array.isArray(message.attachments) && message.attachments.length > 0 && (
+                              <div className="mt-2 space-y-1.5">
+                                {message.attachments.map((attachment) => (
+                                  <a
+                                    key={`${message.id}-${attachment.url}`}
+                                    href={attachment.url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className={cn(
+                                      "block rounded-xl border px-2.5 py-1.5 text-xs",
+                                      isVisitor
+                                        ? "border-background/25 bg-background/10 text-background"
+                                        : "border-foreground/15 bg-background/40 text-foreground"
+                                    )}
+                                  >
+                                    {attachment.name}
+                                  </a>
+                                ))}
+                              </div>
+                            )}
+                            <p className={cn("mt-1 text-[10px]", isVisitor ? "text-background/65" : "text-foreground/45")}>
+                              {safeFormatTime(message.created_at)}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     );
                   })}

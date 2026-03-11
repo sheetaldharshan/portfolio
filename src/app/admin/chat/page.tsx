@@ -50,6 +50,53 @@ const formatTime = (iso: string) => {
   return date.toLocaleString();
 };
 
+const formatRelativeTime = (iso: string) => {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const diffMs = Date.now() - date.getTime();
+  const minutes = Math.floor(diffMs / 60000);
+  if (minutes < 1) return "Just now";
+  if (minutes < 60) return `${minutes}m ago`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+};
+
+const statusLabel = (status: Conversation["status"]) => {
+  if (status === "ai_active") return "AI Active";
+  if (status === "human_takeover") return "Human Takeover";
+  return "Resolved";
+};
+
+const statusPillClass = (status: Conversation["status"], active: boolean) => {
+  if (status === "ai_active") {
+    return active
+      ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-400"
+      : "border-emerald-500/30 bg-emerald-500/10 text-emerald-300";
+  }
+
+  if (status === "human_takeover") {
+    return active
+      ? "border-amber-500/45 bg-amber-500/15 text-amber-300"
+      : "border-amber-500/35 bg-amber-500/10 text-amber-300";
+  }
+
+  return active
+    ? "border-sky-500/40 bg-sky-500/15 text-sky-300"
+    : "border-sky-500/30 bg-sky-500/10 text-sky-300";
+};
+
+const quickReplySuggestions = [
+  "Thanks for the details. I can help with that.",
+  "Could you share your timeline and budget?",
+  "I can guide you to the right section now.",
+  "Want me to schedule a quick call?",
+];
+
 export default function AdminChatPage() {
   const [operatorKey, setOperatorKey] = useState("");
   const [draftKey, setDraftKey] = useState("");
@@ -69,6 +116,11 @@ export default function AdminChatPage() {
   const activeConversation = useMemo(
     () => conversations.find((item) => item.id === activeConversationId) || null,
     [activeConversationId, conversations]
+  );
+
+  const unreadTotal = useMemo(
+    () => conversations.reduce((sum, item) => sum + Number(item.unread_for_operator || 0), 0),
+    [conversations]
   );
 
   const fetchConversations = useCallback(async () => {
@@ -312,16 +364,27 @@ export default function AdminChatPage() {
     fetchConversations();
   };
 
+  const handleQuickReply = (text: string) => {
+    setInputValue((prev) => (prev.trim().length > 0 ? `${prev} ${text}` : text));
+  };
+
   return (
     <main className="flex min-h-screen flex-col bg-background">
-      <div className="flex-1 px-4 pb-6 pt-24 md:px-8 md:pb-8">
-        <div className="mx-auto flex h-[calc(100svh-7.5rem)] max-w-7xl flex-col">
+      <div className="flex-1 px-4 pb-6 pt-28 md:px-8 md:pb-8 md:pt-32">
+        <div className="mx-auto flex h-[calc(100svh-8.75rem)] max-w-7xl flex-col">
           <div className="mb-5 rounded-2xl border border-foreground/10 bg-foreground/[0.02] p-4">
-            <h1 className="text-xl font-semibold text-foreground">Assistant Operator Inbox</h1>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h1 className="text-xl font-semibold text-foreground">Assistant Operator Inbox</h1>
+              <div className="inline-flex items-center gap-2 rounded-full border border-foreground/15 bg-background/70 px-3 py-1 text-[11px] text-foreground/70">
+                <span>Conversations: {conversations.length}</span>
+                <span className="h-1 w-1 rounded-full bg-foreground/30" />
+                <span>Unread: {unreadTotal}</span>
+              </div>
+            </div>
             <p className="mt-1 text-xs text-foreground/55">
               Human replies appear to visitors as Sheetal Dharshan. AI mode can be paused with Human Takeover.
             </p>
-            <div className="mt-3 flex gap-2">
+            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
               <input
                 value={draftKey}
                 onChange={(event) => setDraftKey(event.target.value)}
@@ -330,13 +393,13 @@ export default function AdminChatPage() {
               />
               <button
                 onClick={handleSaveOperatorKey}
-                className="h-10 rounded-xl bg-foreground px-4 text-sm font-medium text-background"
+                className="h-10 rounded-xl bg-foreground px-4 text-sm font-medium text-background sm:min-w-[88px]"
               >
                 Save
               </button>
               <button
                 onClick={isPushEnabled ? handleDisablePush : handleEnablePush}
-                className="inline-flex h-10 items-center gap-1 rounded-xl border border-foreground/20 px-3 text-xs text-foreground/80"
+                className="inline-flex h-10 items-center justify-center gap-1 rounded-xl border border-foreground/20 px-3 text-xs text-foreground/80 sm:min-w-[110px]"
               >
                 {isPushEnabled ? <BellOff className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
                 {isPushEnabled ? "Push On" : "Enable Push"}
@@ -361,12 +424,17 @@ export default function AdminChatPage() {
                       : "border-foreground/10 bg-background hover:bg-foreground/[0.03]"
                   )}
                 >
-                  <p className="text-xs font-medium text-foreground">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-xs font-medium text-foreground">
                     {item.visitor_name || "Anonymous visitor"}
-                  </p>
+                    </p>
+                    <span className="text-[10px] text-foreground/45">{formatRelativeTime(item.updated_at)}</span>
+                  </div>
                   <p className="text-[11px] text-foreground/50">{item.visitor_email || "No email"}</p>
                   <div className="mt-1 flex items-center justify-between">
-                    <span className="text-[10px] uppercase tracking-[0.1em] text-foreground/45">{item.status}</span>
+                    <span className={cn("rounded-full border px-1.5 py-0.5 text-[10px]", statusPillClass(item.status, item.id === activeConversationId))}>
+                      {statusLabel(item.status)}
+                    </span>
                     {item.unread_for_operator > 0 && (
                       <span className="rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] text-white">
                         {item.unread_for_operator}
@@ -385,8 +453,13 @@ export default function AdminChatPage() {
             {activeConversation ? (
               <>
                 <div className="border-b border-foreground/10 px-4 py-3">
-                  <p className="text-sm font-medium text-foreground">{activeConversation.visitor_name || "Anonymous visitor"}</p>
-                  <p className="text-xs text-foreground/55">{activeConversation.visitor_email || "No email"}</p>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{activeConversation.visitor_name || "Anonymous visitor"}</p>
+                      <p className="text-xs text-foreground/55">{activeConversation.visitor_email || "No email"}</p>
+                    </div>
+                    <span className="text-[11px] text-foreground/45">Updated {formatRelativeTime(activeConversation.updated_at)}</span>
+                  </div>
                   <div className="mt-2 flex flex-wrap gap-2">
                     <button
                       onClick={() => handleStatusChange("ai_active")}
@@ -437,44 +510,70 @@ export default function AdminChatPage() {
                   {!loadingMessages && messages.length === 0 && <p className="text-xs text-foreground/45">No messages in this thread.</p>}
                   {messages.map((message) => {
                 const isVisitor = message.sender_role === "visitor";
+                const isOperator = message.sender_role === "operator";
                 return (
                   <div key={message.id} className={cn("flex", isVisitor ? "justify-start" : "justify-end")}>
-                    <div
-                      className={cn(
-                        "max-w-[78%] rounded-2xl px-3 py-2",
-                        isVisitor
-                          ? "rounded-bl-md border border-foreground/10 bg-background"
-                          : "rounded-br-md bg-foreground text-background"
-                      )}
-                    >
-                      <p className={cn("text-[10px] uppercase tracking-[0.12em]", isVisitor ? "text-foreground/45" : "text-background/70")}>
-                        {message.sender_label}
-                      </p>
-                      <p className={cn("mt-1 text-sm", isVisitor ? "text-foreground" : "text-background")}>{message.content}</p>
-                      {Array.isArray(message.attachments) && message.attachments.length > 0 && (
-                        <div className="mt-2 space-y-1.5">
-                          {message.attachments.map((attachment) => (
-                            <a
-                              key={`${message.id}-${attachment.url}`}
-                              href={attachment.url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className={cn(
-                                "block rounded-xl border px-2.5 py-1.5 text-xs",
-                                isVisitor
-                                  ? "border-foreground/20 bg-foreground/[0.03] text-foreground"
-                                  : "border-background/20 bg-background/10 text-background"
-                              )}
-                            >
-                              {attachment.name}
-                            </a>
-                          ))}
+                    {isOperator ? (
+                      <div className="max-w-[78%] rounded-2xl rounded-br-md bg-gradient-to-r from-fuchsia-500/85 via-violet-500/85 to-cyan-500/85 p-[1px] shadow-[0_10px_28px_rgba(139,92,246,0.25)]">
+                        <div className="rounded-2xl rounded-br-md bg-background px-3 py-2 text-foreground">
+                          <p className="text-[10px] uppercase tracking-[0.12em] text-foreground/50">{message.sender_label}</p>
+                          <p className="mt-1 whitespace-pre-wrap text-sm text-foreground">{message.content}</p>
+                          {Array.isArray(message.attachments) && message.attachments.length > 0 && (
+                            <div className="mt-2 space-y-1.5">
+                              {message.attachments.map((attachment) => (
+                                <a
+                                  key={`${message.id}-${attachment.url}`}
+                                  href={attachment.url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="block rounded-xl border border-foreground/20 bg-foreground/[0.03] px-2.5 py-1.5 text-xs text-foreground"
+                                >
+                                  {attachment.name}
+                                </a>
+                              ))}
+                            </div>
+                          )}
+                          <p className="mt-1 text-[10px] text-foreground/45">{formatTime(message.created_at)}</p>
                         </div>
-                      )}
-                      <p className={cn("mt-1 text-[10px]", isVisitor ? "text-foreground/45" : "text-background/60")}>
-                        {formatTime(message.created_at)}
-                      </p>
-                    </div>
+                      </div>
+                    ) : (
+                      <div
+                        className={cn(
+                          "max-w-[78%] rounded-2xl px-3 py-2",
+                          isVisitor
+                            ? "rounded-bl-md border border-foreground/10 bg-background"
+                            : "rounded-br-md bg-foreground text-background"
+                        )}
+                      >
+                        <p className={cn("text-[10px] uppercase tracking-[0.12em]", isVisitor ? "text-foreground/45" : "text-background/70")}>
+                          {message.sender_label}
+                        </p>
+                        <p className={cn("mt-1 whitespace-pre-wrap text-sm", isVisitor ? "text-foreground" : "text-background")}>{message.content}</p>
+                        {Array.isArray(message.attachments) && message.attachments.length > 0 && (
+                          <div className="mt-2 space-y-1.5">
+                            {message.attachments.map((attachment) => (
+                              <a
+                                key={`${message.id}-${attachment.url}`}
+                                href={attachment.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className={cn(
+                                  "block rounded-xl border px-2.5 py-1.5 text-xs",
+                                  isVisitor
+                                    ? "border-foreground/20 bg-foreground/[0.03] text-foreground"
+                                    : "border-background/20 bg-background/10 text-background"
+                                )}
+                              >
+                                {attachment.name}
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                        <p className={cn("mt-1 text-[10px]", isVisitor ? "text-foreground/45" : "text-background/60")}>
+                          {formatTime(message.created_at)}
+                        </p>
+                      </div>
+                    )}
                   </div>
                   );
                 })}
@@ -487,6 +586,17 @@ export default function AdminChatPage() {
               <p className="mb-2 text-[11px] text-foreground/45">
                 Use hidden navigation tags like [[open:/blog]], [[open:/hire-me]], or [[scroll:projects]] to move the visitor without showing the tag in chat.
               </p>
+              <div className="mb-2 flex flex-wrap gap-1.5">
+                {quickReplySuggestions.map((item) => (
+                  <button
+                    key={item}
+                    onClick={() => handleQuickReply(item)}
+                    className="rounded-full border border-foreground/15 bg-foreground/[0.03] px-2.5 py-1 text-[11px] text-foreground/75 transition-colors hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
               {pendingAttachments.length > 0 && (
                 <div className="mb-2 flex flex-wrap gap-1.5">
                   {pendingAttachments.map((attachment) => (
