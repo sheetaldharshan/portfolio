@@ -78,6 +78,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${space.variable} ${mono.variable} ${signature.variable} ${modern.variable} ${elnath.variable} ${pavelt.variable}`} suppressHydrationWarning>
       <body className="antialiased font-sans bg-background text-foreground transition-colors duration-300">
+        {/* Pre-hydration: instantly cover viewport for first-visit loader (runs before React) */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{if(!sessionStorage.getItem('sd_first_visit_loader_done')){document.documentElement.setAttribute('data-loading','')}}catch(e){}})()`,
+          }}
+        />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

@@ -58,10 +58,15 @@ const makeVisitorSessionId = () => {
   return `session-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 };
 
-const safeFormatTime = (iso: string) => {
+const safeFormatTime = (iso: string, hydrated: boolean) => {
+  if (!hydrated) return "";
   const parsed = new Date(iso);
   if (Number.isNaN(parsed.getTime())) return "";
-  return parsed.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  }).format(parsed);
 };
 
 const byCreatedAtAsc = (a: AssistantMessage, b: AssistantMessage) => {
@@ -146,6 +151,7 @@ const resolveCommandTarget = (value: string): NavigationTarget | null => {
 export const SiteAssistantWidget = () => {
   const router = useRouter();
   const pathname = usePathname();
+  const [hasHydrated, setHasHydrated] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
@@ -172,6 +178,10 @@ export const SiteAssistantWidget = () => {
   const resizeStartRef = useRef<{ x: number; y: number; width: number; height: number } | null>(null);
   const resizePointerIdRef = useRef<number | null>(null);
   const resizeDirectionRef = useRef<{ x: 1 | -1; y: 1 | -1 }>({ x: -1, y: -1 });
+
+  useEffect(() => {
+    setHasHydrated(true);
+  }, []);
 
   const getMaxWidgetSize = useCallback(() => {
     if (typeof window === "undefined") {
@@ -879,7 +889,7 @@ export const SiteAssistantWidget = () => {
                                   ))}
                                 </div>
                               )}
-                              <p className="mt-1 text-[10px] text-foreground/45">{safeFormatTime(message.created_at)}</p>
+                              <p className="mt-1 text-[10px] text-foreground/45" suppressHydrationWarning>{safeFormatTime(message.created_at, hasHydrated)}</p>
                             </div>
                           </div>
                         ) : (
@@ -914,7 +924,7 @@ export const SiteAssistantWidget = () => {
                               </div>
                             )}
                             <p className={cn("mt-1 text-[10px]", isVisitor ? "text-background/65" : "text-foreground/45")}>
-                              {safeFormatTime(message.created_at)}
+                              <span suppressHydrationWarning>{safeFormatTime(message.created_at, hasHydrated)}</span>
                             </p>
                           </div>
                         )}

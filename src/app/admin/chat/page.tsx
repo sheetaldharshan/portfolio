@@ -44,13 +44,22 @@ const base64UrlToUint8Array = (base64String: string) => {
   return outputArray;
 };
 
-const formatTime = (iso: string) => {
+const formatTime = (iso: string, hydrated: boolean) => {
+  if (!hydrated) return "";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";
-  return date.toLocaleString();
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  }).format(date);
 };
 
-const formatRelativeTime = (iso: string) => {
+const formatRelativeTime = (iso: string, hydrated: boolean) => {
+  if (!hydrated) return "";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";
 
@@ -98,6 +107,7 @@ const quickReplySuggestions = [
 ];
 
 export default function AdminChatPage() {
+  const [hasHydrated, setHasHydrated] = useState(false);
   const [operatorKey, setOperatorKey] = useState("");
   const [draftKey, setDraftKey] = useState("");
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -115,6 +125,10 @@ export default function AdminChatPage() {
   const messagesScrollRef = useRef<HTMLDivElement>(null);
   const previousConversationIdRef = useRef<string | null>(null);
   const previousLastMessageIdRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    setHasHydrated(true);
+  }, []);
 
   const activeConversation = useMemo(
     () => conversations.find((item) => item.id === activeConversationId) || null,
@@ -472,7 +486,7 @@ export default function AdminChatPage() {
                     <p className="text-xs font-medium text-foreground">
                     {item.visitor_name || "Anonymous visitor"}
                     </p>
-                    <span className="text-[10px] text-foreground/45">{formatRelativeTime(item.updated_at)}</span>
+                    <span className="text-[10px] text-foreground/45" suppressHydrationWarning>{formatRelativeTime(item.updated_at, hasHydrated)}</span>
                   </div>
                   <p className="text-[11px] text-foreground/50">{item.visitor_email || "No email"}</p>
                   <div className="mt-1 flex items-center justify-between">
@@ -502,7 +516,7 @@ export default function AdminChatPage() {
                       <p className="text-sm font-medium text-foreground">{activeConversation.visitor_name || "Anonymous visitor"}</p>
                       <p className="text-xs text-foreground/55">{activeConversation.visitor_email || "No email"}</p>
                     </div>
-                    <span className="text-[11px] text-foreground/45">Updated {formatRelativeTime(activeConversation.updated_at)}</span>
+                    <span className="text-[11px] text-foreground/45" suppressHydrationWarning>Updated {formatRelativeTime(activeConversation.updated_at, hasHydrated)}</span>
                   </div>
                   <div className="mt-1.5 flex flex-wrap gap-1.5">
                     <button
@@ -585,7 +599,7 @@ export default function AdminChatPage() {
                               ))}
                             </div>
                           )}
-                          <p className="mt-1 text-[10px] text-foreground/45">{formatTime(message.created_at)}</p>
+                          <p className="mt-1 text-[10px] text-foreground/45" suppressHydrationWarning>{formatTime(message.created_at, hasHydrated)}</p>
                         </div>
                       </div>
                     ) : (
@@ -622,7 +636,7 @@ export default function AdminChatPage() {
                           </div>
                         )}
                         <p className={cn("mt-1 text-[10px]", isVisitor ? "text-foreground/45" : "text-foreground/50")}>
-                          {formatTime(message.created_at)}
+                          <span suppressHydrationWarning>{formatTime(message.created_at, hasHydrated)}</span>
                         </p>
                       </div>
                     )}

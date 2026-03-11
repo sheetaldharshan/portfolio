@@ -46,17 +46,30 @@ interface ShowcaseItem {
     url: string;
 }
 
+const INITIAL_CHAT_TIMESTAMP = "2026-01-01T00:00:00.000Z";
+const INITIAL_SESSION_ID = "session-initial";
+const INITIAL_WELCOME_ID = "welcome-initial";
+
 const showcaseItems: ShowcaseItem[] = [
     { id: "work", title: "Project Showcase", subtitle: "Featured builds", url: "/work" },
     { id: "blog", title: "Blog", subtitle: "Thoughts and notes", url: "/blog" },
     { id: "hire", title: "Hire Me", subtitle: "Services and process", url: "/hire-me" },
 ];
 
+const formatClockTime = (timestamp: Date, hydrated: boolean) => {
+    if (!hydrated) return "";
+    return new Intl.DateTimeFormat("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+    }).format(timestamp);
+};
+
 const createWelcomeMessage = (): Message => ({
-    id: `welcome-${Date.now()}`,
+    id: INITIAL_WELCOME_ID,
     type: "bot",
     text: `Hi👋, Ask me anything about **${persona.name}** ...`,
-    timestamp: new Date(),
+    timestamp: new Date(INITIAL_CHAT_TIMESTAMP),
 });
 
 const TypingIndicator = () => (
@@ -174,17 +187,18 @@ const formatMessage = (text: string) => {
 
 export const ChatBot = ({ isHeroVariant = false }: ChatBotProps) => {
     const router = useRouter();
+    const [hasHydrated, setHasHydrated] = useState(false);
     const [sessions, setSessions] = useState<ChatSession[]>(() => {
         const initialSession: ChatSession = {
-            id: `session-${Date.now()}`,
+            id: INITIAL_SESSION_ID,
             title: "New Chat",
             messages: [createWelcomeMessage()],
-            createdAt: new Date(),
-            lastUpdated: new Date()
+            createdAt: new Date(INITIAL_CHAT_TIMESTAMP),
+            lastUpdated: new Date(INITIAL_CHAT_TIMESTAMP)
         };
         return [initialSession];
     });
-    const [activeSessionId, setActiveSessionId] = useState(() => sessions[0]?.id || `session-${Date.now()}`);
+    const [activeSessionId, setActiveSessionId] = useState(() => sessions[0]?.id || INITIAL_SESSION_ID);
     const [isTyping, setIsTyping] = useState(false);
     const [showScrollIndicator, setShowScrollIndicator] = useState(false);
     const [language, setLanguage] = useState("en");
@@ -219,6 +233,10 @@ export const ChatBot = ({ isHeroVariant = false }: ChatBotProps) => {
             });
         }
     };
+
+    useEffect(() => {
+        setHasHydrated(true);
+    }, []);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -771,6 +789,7 @@ export const ChatBot = ({ isHeroVariant = false }: ChatBotProps) => {
         : `http://localhost:3000${previewUrl}`;
 
     const formatTimeAgo = (timestamp: Date) => {
+        if (!hasHydrated) return "";
         const diffMinutes = Math.max(0, Math.floor((Date.now() - timestamp.getTime()) / 60000));
         if (diffMinutes < 1) return "now";
         if (diffMinutes < 60) return `${diffMinutes}m`;
@@ -928,7 +947,7 @@ export const ChatBot = ({ isHeroVariant = false }: ChatBotProps) => {
                                                             <span className={cn("inline-flex h-4 items-center rounded-full border px-1.5", msg.type === "user" ? "border-primary/20 bg-primary/10 text-primary/90" : "border-foreground/10 bg-foreground/[0.03] text-foreground/50")}>
                                                                 {msg.type === "user" ? "You" : persona.name}
                                                             </span>
-                                                            <span>{msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                                                            <span suppressHydrationWarning>{formatClockTime(msg.timestamp, hasHydrated)}</span>
                                                         </div>
                                                         <div
                                                             className={cn(
@@ -1148,7 +1167,7 @@ export const ChatBot = ({ isHeroVariant = false }: ChatBotProps) => {
                                                 <span className={cn("inline-flex h-4 items-center rounded-full border px-1.5", msg.type === "user" ? "border-primary/20 bg-primary/10 text-primary/90" : "border-foreground/10 bg-foreground/[0.03] text-foreground/50")}>
                                                     {msg.type === "user" ? "You" : persona.name}
                                                 </span>
-                                                <span>{msg.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
+                                                <span suppressHydrationWarning>{formatClockTime(msg.timestamp, hasHydrated)}</span>
                                             </div>
                                             <div
                                                 className={cn(
