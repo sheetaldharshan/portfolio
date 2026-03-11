@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { Inter, Space_Grotesk, JetBrains_Mono, Sacramento, Bricolage_Grotesque } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
 import config from "@/data/config";
 
 const inter = Inter({
@@ -67,10 +65,10 @@ export const metadata: Metadata = {
 import { ThemeProvider } from "@/components/theme-provider";
 import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
+import { AppChrome } from "@/components/layout/AppChrome";
 
 import { StarsBackground } from "@/components/ui/StarsBackground";
 import { ShootingStars } from "@/components/ui/ShootingStars";
-import { SiteAssistantWidget } from "@/components/layout/SiteAssistantWidget";
 
 export default function RootLayout({
   children,
@@ -105,10 +103,7 @@ export default function RootLayout({
           </div>
 
           <SmoothScroll>
-            <Navbar />
-            {children}
-            <Footer />
-            <SiteAssistantWidget />
+            <AppChrome>{children}</AppChrome>
           </SmoothScroll>
         </ThemeProvider>
       </body>

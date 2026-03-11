@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { Bell, BellOff, Paperclip, Send, X } from "lucide-react";
+import { Bell, BellOff, ChevronDown, ChevronUp, Paperclip, Search, Send, X } from "lucide-react";
 
 type AssistantAttachment = {
   name: string;
@@ -109,6 +109,9 @@ export default function AdminChatPage() {
   const [loadingConversations, setLoadingConversations] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [isPushEnabled, setIsPushEnabled] = useState(false);
+  const [isSettingsCollapsed, setIsSettingsCollapsed] = useState(true);
+  const [conversationQuery, setConversationQuery] = useState("");
+  const [activeScrollPanel, setActiveScrollPanel] = useState<"conversations" | "messages" | null>(null);
   const messagesScrollRef = useRef<HTMLDivElement>(null);
   const previousConversationIdRef = useRef<string | null>(null);
   const previousLastMessageIdRef = useRef<string | null>(null);
@@ -122,6 +125,18 @@ export default function AdminChatPage() {
     () => conversations.reduce((sum, item) => sum + Number(item.unread_for_operator || 0), 0),
     [conversations]
   );
+
+  const filteredConversations = useMemo(() => {
+    const query = conversationQuery.trim().toLowerCase();
+    if (!query) return conversations;
+
+    return conversations.filter((item) => {
+      const name = (item.visitor_name || "anonymous visitor").toLowerCase();
+      const email = (item.visitor_email || "").toLowerCase();
+      const status = statusLabel(item.status).toLowerCase();
+      return name.includes(query) || email.includes(query) || status.includes(query);
+    });
+  }, [conversationQuery, conversations]);
 
   const fetchConversations = useCallback(async () => {
     if (!operatorKey) return;
@@ -370,50 +385,79 @@ export default function AdminChatPage() {
 
   return (
     <main className="flex min-h-screen flex-col bg-background">
-      <div className="flex-1 px-4 pb-6 pt-28 md:px-8 md:pb-8 md:pt-32">
-        <div className="mx-auto flex h-[calc(100svh-8.75rem)] max-w-7xl flex-col">
-          <div className="mb-5 rounded-2xl border border-foreground/10 bg-foreground/[0.02] p-4">
+      <div className="flex-1 px-2 pb-2 pt-3 md:px-4 md:pb-3 md:pt-4">
+        <div className="mx-auto flex h-[calc(100svh-1.25rem)] w-full max-w-[min(99vw,1760px)] flex-col">
+          <div className="mb-1.5 rounded-2xl border border-foreground/10 bg-foreground/[0.02] p-2.5">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h1 className="text-xl font-semibold text-foreground">Assistant Operator Inbox</h1>
-              <div className="inline-flex items-center gap-2 rounded-full border border-foreground/15 bg-background/70 px-3 py-1 text-[11px] text-foreground/70">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setIsSettingsCollapsed((prev) => !prev)}
+                  className="inline-flex items-center gap-1 rounded-full border border-foreground/15 bg-background/70 px-3 py-1 text-[11px] text-foreground/75 transition-colors hover:border-foreground/25"
+                >
+                  {isSettingsCollapsed ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronUp className="h-3.5 w-3.5" />}
+                  Settings
+                </button>
+                <div className="inline-flex items-center gap-2 rounded-full border border-foreground/15 bg-background/70 px-3 py-1 text-[11px] text-foreground/70">
                 <span>Conversations: {conversations.length}</span>
                 <span className="h-1 w-1 rounded-full bg-foreground/30" />
                 <span>Unread: {unreadTotal}</span>
+                </div>
               </div>
             </div>
-            <p className="mt-1 text-xs text-foreground/55">
+            <p className="mt-1 text-[11px] text-foreground/55">
               Human replies appear to visitors as Sheetal Dharshan. AI mode can be paused with Human Takeover.
             </p>
-            <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-              <input
-                value={draftKey}
-                onChange={(event) => setDraftKey(event.target.value)}
-                placeholder="ASSISTANT_OPERATOR_KEY"
-                className="h-10 w-full rounded-xl border border-foreground/15 bg-background px-3 text-sm outline-none focus:border-primary/40"
-              />
-              <button
-                onClick={handleSaveOperatorKey}
-                className="h-10 rounded-xl bg-foreground px-4 text-sm font-medium text-background sm:min-w-[88px]"
-              >
-                Save
-              </button>
-              <button
-                onClick={isPushEnabled ? handleDisablePush : handleEnablePush}
-                className="inline-flex h-10 items-center justify-center gap-1 rounded-xl border border-foreground/20 px-3 text-xs text-foreground/80 sm:min-w-[110px]"
-              >
-                {isPushEnabled ? <BellOff className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
-                {isPushEnabled ? "Push On" : "Enable Push"}
-              </button>
-            </div>
+            {!isSettingsCollapsed && (
+              <div className="mt-2 flex flex-col gap-2 sm:flex-row">
+                <input
+                  value={draftKey}
+                  onChange={(event) => setDraftKey(event.target.value)}
+                  placeholder="ASSISTANT_OPERATOR_KEY"
+                  className="h-10 w-full rounded-xl border border-foreground/15 bg-background px-3 text-sm outline-none focus:border-primary/40"
+                />
+                <button
+                  onClick={handleSaveOperatorKey}
+                  className="h-10 rounded-xl bg-foreground px-4 text-sm font-medium text-background sm:min-w-[88px]"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={isPushEnabled ? handleDisablePush : handleEnablePush}
+                  className="inline-flex h-10 items-center justify-center gap-1 rounded-xl border border-foreground/20 px-3 text-xs text-foreground/80 sm:min-w-[110px]"
+                >
+                  {isPushEnabled ? <BellOff className="h-4 w-4" /> : <Bell className="h-4 w-4" />}
+                  {isPushEnabled ? "Push On" : "Enable Push"}
+                </button>
+              </div>
+            )}
           </div>
 
-          <div className="grid min-h-0 flex-1 grid-cols-1 gap-4 lg:grid-cols-[320px_minmax(0,1fr)]">
-            <aside className="flex min-h-0 flex-col rounded-2xl border border-foreground/10 bg-foreground/[0.02] p-2">
+          <div className="grid min-h-0 flex-1 grid-cols-1 gap-2 lg:grid-cols-[300px_minmax(0,1fr)]">
+            <aside className="flex h-full min-h-0 flex-col rounded-2xl border border-foreground/10 bg-foreground/[0.02] p-2">
             <div className="mb-2 px-2 py-1 text-xs uppercase tracking-[0.14em] text-foreground/50">
-              Conversations {loadingConversations ? "(loading)" : `(${conversations.length})`}
+              Conversations ({filteredConversations.length})
             </div>
-            <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
-              {conversations.map((item) => (
+            <div className="mb-2 px-1">
+              <div className="flex items-center gap-2 rounded-xl border border-foreground/15 bg-background px-2">
+                <Search className="h-3.5 w-3.5 text-foreground/45" />
+                <input
+                  value={conversationQuery}
+                  onChange={(event) => setConversationQuery(event.target.value)}
+                  placeholder="Search conversations"
+                  className="h-8 w-full bg-transparent text-xs text-foreground outline-none placeholder:text-foreground/40"
+                />
+              </div>
+            </div>
+            <div
+              onMouseDown={() => setActiveScrollPanel("conversations")}
+              onFocus={() => setActiveScrollPanel("conversations")}
+              className={cn(
+                "admin-chat-scroll min-h-0 flex-1 space-y-2 overflow-y-auto pr-1",
+                activeScrollPanel !== "conversations" && "admin-chat-scroll-idle"
+              )}
+            >
+              {filteredConversations.map((item) => (
                 <button
                   key={item.id}
                   onClick={() => setActiveConversationId(item.id)}
@@ -443,16 +487,16 @@ export default function AdminChatPage() {
                   </div>
                 </button>
               ))}
-              {!loadingConversations && conversations.length === 0 && (
+              {!loadingConversations && filteredConversations.length === 0 && (
                 <p className="px-2 py-4 text-xs text-foreground/45">No conversations yet.</p>
               )}
             </div>
           </aside>
 
-          <section className="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-foreground/10 bg-foreground/[0.02]">
+          <section className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-foreground/10 bg-foreground/[0.02]">
             {activeConversation ? (
               <>
-                <div className="border-b border-foreground/10 px-4 py-3">
+                <div className="border-b border-foreground/10 px-4 py-2">
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="text-sm font-medium text-foreground">{activeConversation.visitor_name || "Anonymous visitor"}</p>
@@ -460,11 +504,11 @@ export default function AdminChatPage() {
                     </div>
                     <span className="text-[11px] text-foreground/45">Updated {formatRelativeTime(activeConversation.updated_at)}</span>
                   </div>
-                  <div className="mt-2 flex flex-wrap gap-2">
+                  <div className="mt-1.5 flex flex-wrap gap-1.5">
                     <button
                       onClick={() => handleStatusChange("ai_active")}
                       className={cn(
-                        "rounded-full border px-2.5 py-1 text-[11px]",
+                        "rounded-full border px-2 py-0.5 text-[10px]",
                         activeConversation.status === "ai_active"
                           ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-400"
                           : "border-foreground/15 text-foreground/70"
@@ -475,7 +519,7 @@ export default function AdminChatPage() {
                     <button
                       onClick={() => handleStatusChange("human_takeover")}
                       className={cn(
-                        "rounded-full border px-2.5 py-1 text-[11px]",
+                        "rounded-full border px-2 py-0.5 text-[10px]",
                         activeConversation.status === "human_takeover"
                           ? "border-amber-500/40 bg-amber-500/15 text-amber-300"
                           : "border-foreground/15 text-foreground/70"
@@ -486,7 +530,7 @@ export default function AdminChatPage() {
                     <button
                       onClick={() => handleStatusChange("resolved")}
                       className={cn(
-                        "rounded-full border px-2.5 py-1 text-[11px]",
+                        "rounded-full border px-2 py-0.5 text-[10px]",
                         activeConversation.status === "resolved"
                           ? "border-sky-500/40 bg-sky-500/15 text-sky-300"
                           : "border-foreground/15 text-foreground/70"
@@ -505,14 +549,22 @@ export default function AdminChatPage() {
 
             {activeConversation && (
               <>
-                <div ref={messagesScrollRef} className="min-h-0 flex-1 space-y-2 overflow-y-auto px-4 py-4">
-                  {loadingMessages && <p className="text-xs text-foreground/50">Loading messages...</p>}
+                <div
+                  ref={messagesScrollRef}
+                  onMouseDown={() => setActiveScrollPanel("messages")}
+                  onFocus={() => setActiveScrollPanel("messages")}
+                  className={cn(
+                    "admin-chat-scroll min-h-0 flex-1 space-y-2 overflow-y-auto px-4 py-3",
+                    activeScrollPanel !== "messages" && "admin-chat-scroll-idle"
+                  )}
+                >
                   {!loadingMessages && messages.length === 0 && <p className="text-xs text-foreground/45">No messages in this thread.</p>}
                   {messages.map((message) => {
                 const isVisitor = message.sender_role === "visitor";
                 const isOperator = message.sender_role === "operator";
+                const isAssistant = message.sender_role === "assistant";
                 return (
-                  <div key={message.id} className={cn("flex", isVisitor ? "justify-start" : "justify-end")}>
+                  <div key={message.id} className={cn("flex", isOperator ? "justify-end" : "justify-start")}>
                     {isOperator ? (
                       <div className="max-w-[78%] rounded-2xl rounded-br-md bg-gradient-to-r from-fuchsia-500/85 via-violet-500/85 to-cyan-500/85 p-[1px] shadow-[0_10px_28px_rgba(139,92,246,0.25)]">
                         <div className="rounded-2xl rounded-br-md bg-background px-3 py-2 text-foreground">
@@ -542,13 +594,13 @@ export default function AdminChatPage() {
                           "max-w-[78%] rounded-2xl px-3 py-2",
                           isVisitor
                             ? "rounded-bl-md border border-foreground/10 bg-background"
-                            : "rounded-br-md bg-foreground text-background"
+                            : "rounded-bl-md border border-sky-500/25 bg-sky-500/[0.08] text-foreground"
                         )}
                       >
-                        <p className={cn("text-[10px] uppercase tracking-[0.12em]", isVisitor ? "text-foreground/45" : "text-background/70")}>
+                        <p className={cn("text-[10px] uppercase tracking-[0.12em]", isVisitor ? "text-foreground/45" : "text-sky-300/80")}>
                           {message.sender_label}
                         </p>
-                        <p className={cn("mt-1 whitespace-pre-wrap text-sm", isVisitor ? "text-foreground" : "text-background")}>{message.content}</p>
+                        <p className={cn("mt-1 whitespace-pre-wrap text-sm", isAssistant ? "text-foreground" : "text-foreground")}>{message.content}</p>
                         {Array.isArray(message.attachments) && message.attachments.length > 0 && (
                           <div className="mt-2 space-y-1.5">
                             {message.attachments.map((attachment) => (
@@ -561,7 +613,7 @@ export default function AdminChatPage() {
                                   "block rounded-xl border px-2.5 py-1.5 text-xs",
                                   isVisitor
                                     ? "border-foreground/20 bg-foreground/[0.03] text-foreground"
-                                    : "border-background/20 bg-background/10 text-background"
+                                    : "border-sky-500/20 bg-sky-500/[0.06] text-foreground"
                                 )}
                               >
                                 {attachment.name}
@@ -569,7 +621,7 @@ export default function AdminChatPage() {
                             ))}
                           </div>
                         )}
-                        <p className={cn("mt-1 text-[10px]", isVisitor ? "text-foreground/45" : "text-background/60")}>
+                        <p className={cn("mt-1 text-[10px]", isVisitor ? "text-foreground/45" : "text-foreground/50")}>
                           {formatTime(message.created_at)}
                         </p>
                       </div>
@@ -582,16 +634,16 @@ export default function AdminChatPage() {
             )}
 
             {activeConversation && (
-              <div className="border-t border-foreground/10 bg-background/45 p-3 backdrop-blur-sm">
-              <p className="mb-2 text-[11px] text-foreground/45">
+              <div className="border-t border-foreground/10 bg-background/45 p-2.5 backdrop-blur-sm">
+              <p className="mb-1 text-[10px] text-foreground/45">
                 Use hidden navigation tags like [[open:/blog]], [[open:/hire-me]], or [[scroll:projects]] to move the visitor without showing the tag in chat.
               </p>
-              <div className="mb-2 flex flex-wrap gap-1.5">
+              <div className="admin-chat-scroll-x mb-1.5 flex gap-1.5 overflow-x-auto pb-1">
                 {quickReplySuggestions.map((item) => (
                   <button
                     key={item}
                     onClick={() => handleQuickReply(item)}
-                    className="rounded-full border border-foreground/15 bg-foreground/[0.03] px-2.5 py-1 text-[11px] text-foreground/75 transition-colors hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
+                    className="whitespace-nowrap rounded-full border border-foreground/15 bg-foreground/[0.03] px-2 py-0.5 text-[10px] text-foreground/75 transition-colors hover:border-primary/30 hover:bg-primary/10 hover:text-foreground"
                   >
                     {item}
                   </button>
@@ -631,7 +683,7 @@ export default function AdminChatPage() {
                     }
                   }}
                   placeholder="Reply as Sheetal Dharshan..."
-                  className="h-10 w-full bg-transparent px-2 text-sm text-foreground outline-none"
+                  className="h-9 w-full bg-transparent px-2 text-sm text-foreground outline-none"
                 />
                 <button
                   onClick={handleSendOperatorMessage}
