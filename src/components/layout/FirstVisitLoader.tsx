@@ -32,9 +32,9 @@ export function FirstVisitLoader() {
     const id = window.setInterval(() => {
       setPercent((p) => {
         if (p >= 100) return 100;
-        return Math.min(100, p + (p < 72 ? 7 : 3));
+        return Math.min(100, p + (p < 72 ? 5 : 2));
       });
-    }, 65);
+    }, 85);
     return () => window.clearInterval(id);
   }, [visible]);
 
@@ -43,16 +43,16 @@ export function FirstVisitLoader() {
     if (!visible || percent < 100 || done.current) return;
     done.current = true;
 
-    // 350ms → pill switches from "Loading 100%" to "Welcome"
-    const t1 = setTimeout(() => setLoaded(true), 350);
-    // 1100ms → trigger the expand transition
-    const t2 = setTimeout(() => setClicked(true), 1100);
-    // 1900ms → unmount loader, mark done for this session, remove pre-hydration backdrop
+    // 500ms → pill switches from "Loading 100%" to "Welcome"
+    const t1 = setTimeout(() => setLoaded(true), 500);
+    // 1500ms → trigger the expand transition
+    const t2 = setTimeout(() => setClicked(true), 1500);
+    // 2500ms → unmount loader, mark done for this session, remove pre-hydration backdrop
     const t3 = setTimeout(() => {
       sessionStorage.setItem(FIRST_VISIT_KEY, "true");
       document.documentElement.removeAttribute("data-loading");
       setVisible(false);
-    }, 1900);
+    }, 2500);
 
     return () => {
       clearTimeout(t1);
