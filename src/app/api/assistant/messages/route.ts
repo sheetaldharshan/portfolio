@@ -65,6 +65,26 @@ const maybeSendWhatsAppAlert = async (payload: {
   }
 };
 
+const maybeSendTelegramAlert = async (text: string) => {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  if (!botToken || !chatId) return;
+
+  try {
+    await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text,
+        disable_web_page_preview: true,
+      }),
+    });
+  } catch (error) {
+    console.error("assistant telegram alert error", error);
+  }
+};
+
 export async function GET(request: NextRequest) {
   const conversationId = request.nextUrl.searchParams.get("conversationId") || "";
   const actor = request.nextUrl.searchParams.get("actor") || "visitor";
@@ -250,6 +270,11 @@ export async function POST(request: Request) {
     }
 
     if (senderRole === "visitor") {
+      const visitorName = conversation.visitor_name || "Visitor";
+      const alertText = content
+        ? `New visitor message\nName: ${visitorName}\nEmail: ${conversation.visitor_email || "n/a"}\nMessage: ${content.slice(0, 300)}`
+        : `New visitor attachment\nName: ${visitorName}\nEmail: ${conversation.visitor_email || "n/a"}`;
+
       await Promise.all([
         maybeSendEmailAlert({
           conversationId,
@@ -263,6 +288,7 @@ export async function POST(request: Request) {
           visitorEmail: conversation.visitor_email,
           message: content,
         }),
+        maybeSendTelegramAlert(alertText),
       ]);
 
       const { data: subscriptions } = await supabaseServer

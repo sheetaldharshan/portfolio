@@ -94,6 +94,10 @@ ASSISTANT_MAX_FILE_BYTES=10485760
 # Optional alert hooks (new visitor message alerts)
 ASSISTANT_EMAIL_WEBHOOK_URL=https://your-email-webhook
 ASSISTANT_WHATSAPP_WEBHOOK_URL=https://your-whatsapp-webhook
+
+# Free Telegram alerts (recommended)
+TELEGRAM_BOT_TOKEN=123456789:your_bot_token
+TELEGRAM_CHAT_ID=123456789
 ```
 
 ### Database migration
