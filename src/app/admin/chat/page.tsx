@@ -63,6 +63,8 @@ export default function AdminChatPage() {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [isPushEnabled, setIsPushEnabled] = useState(false);
   const messagesScrollRef = useRef<HTMLDivElement>(null);
+  const previousConversationIdRef = useRef<string | null>(null);
+  const previousLastMessageIdRef = useRef<string | null>(null);
 
   const activeConversation = useMemo(
     () => conversations.find((item) => item.id === activeConversationId) || null,
@@ -161,10 +163,21 @@ export default function AdminChatPage() {
     const container = messagesScrollRef.current;
     if (!container) return;
 
-    container.scrollTo({
-      top: container.scrollHeight,
-      behavior: "smooth",
-    });
+    const latestMessageId = messages.length > 0 ? messages[messages.length - 1].id : null;
+    const didConversationChange = previousConversationIdRef.current !== activeConversationId;
+    const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight <= 140;
+
+    if (didConversationChange) {
+      container.scrollTo({ top: container.scrollHeight, behavior: "auto" });
+    } else if (latestMessageId && latestMessageId !== previousLastMessageIdRef.current && isNearBottom) {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+
+    previousConversationIdRef.current = activeConversationId;
+    previousLastMessageIdRef.current = latestMessageId;
   }, [activeConversationId, messages]);
 
   const handleSaveOperatorKey = () => {
