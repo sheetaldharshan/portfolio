@@ -106,6 +106,7 @@ export async function POST(request: Request) {
     const content = String(body?.content || "").trim();
     const senderRole = String(body?.senderRole || "visitor").trim();
     const language = String(body?.language || "en").trim();
+    const skipAiResponse = Boolean(body?.skipAiResponse);
     const attachments: AssistantAttachment[] = Array.isArray(body?.attachments)
       ? body.attachments
           .filter((item: unknown) => {
@@ -182,7 +183,7 @@ export async function POST(request: Request) {
 
     let assistantMessage = null;
 
-    if (senderRole === "visitor" && conversation.status === "ai_active") {
+    if (senderRole === "visitor" && conversation.status === "ai_active" && !skipAiResponse) {
       const { data: history } = await supabaseServer
         .from("assistant_messages")
         .select("sender_role, content")

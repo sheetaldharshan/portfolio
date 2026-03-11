@@ -460,6 +460,9 @@ export default function AdminChatPage() {
 
             {activeConversation && (
               <div className="border-t border-foreground/10 p-3">
+              <p className="mb-2 text-[11px] text-foreground/45">
+                Use hidden navigation tags like [[open:/blog]], [[open:/hire-me]], or [[scroll:projects]] to move the visitor without showing the tag in chat.
+              </p>
               {pendingAttachments.length > 0 && (
                 <div className="mb-2 flex flex-wrap gap-1.5">
                   {pendingAttachments.map((attachment) => (

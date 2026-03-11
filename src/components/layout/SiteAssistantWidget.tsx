@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bot, MessageCircle, Minimize2, Paperclip, Send, UserRound, X } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 type AssistantAttachment = {
@@ -30,10 +30,21 @@ type Conversation = {
   status: "ai_active" | "human_takeover" | "resolved";
 };
 
+type AssistantIntentTarget = {
+  kind: "section" | "route";
+  value: string;
+  reply: string;
+  notice: string;
+};
+
 const VISITOR_SESSION_KEY = "sd_assistant_visitor_session";
 const CONVERSATION_KEY = "sd_assistant_conversation";
 const VISITOR_NAME_KEY = "sd_assistant_visitor_name";
 const VISITOR_EMAIL_KEY = "sd_assistant_visitor_email";
+const VISITOR_PROFILE_CONFIRMED_KEY = "sd_assistant_profile_confirmed";
+const NAVIGATION_COMMAND_PATTERN = /\[\[(open|scroll):([^\]]+)\]\]/gi;
+
+const isValidEmail = (value: string) => /^(?:[a-zA-Z0-9_'^&+%\-/=?`{|}~.!#$*])+@(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/.test(value);
 
 const makeVisitorSessionId = () => {
   if (typeof window === "undefined") return "";
@@ -45,6 +56,20 @@ const safeFormatTime = (iso: string) => {
   const parsed = new Date(iso);
   if (Number.isNaN(parsed.getTime())) return "";
   return parsed.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+};
+
+const byCreatedAtAsc = (a: AssistantMessage, b: AssistantMessage) => {
+  const aTime = new Date(a.created_at).getTime();
+  const bTime = new Date(b.created_at).getTime();
+
+  const safeATime = Number.isNaN(aTime) ? 0 : aTime;
+  const safeBTime = Number.isNaN(bTime) ? 0 : bTime;
+
+  if (safeATime !== safeBTime) {
+    return safeATime - safeBTime;
+  }
+
+  return String(a.id).localeCompare(String(b.id));
 };
 
 const playIncomingSound = () => {
@@ -71,12 +96,156 @@ const playIncomingSound = () => {
   }
 };
 
+const intentTargets: Array<{ pattern: RegExp; target: AssistantIntentTarget }> = [
+  {
+    pattern: /\b(project|projects|portfolio|case study|case studies|build|built|show me your work)\b/i,
+    target: {
+      kind: "section",
+      value: "projects",
+      reply: "She has worked on multiple portfolio and client-focused builds that highlight real-world problem solving and product thinking.",
+      notice: "Opening projects...",
+    },
+  },
+  {
+    pattern: /\b(blog|blogs|post|posts|article|articles|writing|writings|interest|interests|read|reading)\b/i,
+    target: {
+      kind: "route",
+      value: "/blog",
+      reply: "She also shares ideas and written insights around development, digital work, and practical learnings.",
+      notice: "Opening blog...",
+    },
+  },
+  {
+    pattern: /\b(hire|contact|service|services|freelance|freelancer|collaborate|collaboration|quote|client work|get in touch)\b/i,
+    target: {
+      kind: "route",
+      value: "/hire-me",
+      reply: "If you are planning a project, she is available for collaboration and service-based engagements.",
+      notice: "Opening hire me...",
+    },
+  },
+  {
+    pattern: /\b(book|schedule|meeting|consultation|consult|call|appointment|discuss)\b/i,
+    target: {
+      kind: "route",
+      value: "/book-a-call",
+      reply: "You can directly schedule a discussion to talk through requirements, ideas, or timelines.",
+      notice: "Opening booking...",
+    },
+  },
+  {
+    pattern: /\b(about|background|story|journey|who are you|get to know|bio|myself|resume)\b/i,
+    target: {
+      kind: "route",
+      value: "/about",
+      reply: "Sheetal Dharshan is focused on building modern web experiences with a mix of technical depth, design clarity, and practical execution.",
+      notice: "Opening about...",
+    },
+  },
+  {
+    pattern: /\b(skill|skills|stack|tech stack|technology|technologies|tools|framework|frameworks)\b/i,
+    target: {
+      kind: "section",
+      value: "skills",
+      reply: "Her stack includes frontend, backend, and tooling skills used to ship complete products end-to-end.",
+      notice: "Opening skills...",
+    },
+  },
+  {
+    pattern: /\b(what do you do|what you do|services overview|offer|offers|what can you do)\b/i,
+    target: {
+      kind: "section",
+      value: "whatido",
+      reply: "She works across development, solution design, and execution support depending on project needs.",
+      notice: "Opening what I do...",
+    },
+  },
+  {
+    pattern: /\b(work|experience|career|employment|professional experience|resume work)\b/i,
+    target: {
+      kind: "route",
+      value: "/work",
+      reply: "Her work history reflects hands-on delivery across different types of digital and web initiatives.",
+      notice: "Opening work...",
+    },
+  },
+];
+
+const resolveIntentTarget = (value: string) => {
+  for (const intent of intentTargets) {
+    if (intent.pattern.test(value)) {
+      return intent.target;
+    }
+  }
+
+  return null;
+};
+
+const sanitizeMessageContent = (value: string) => value.replace(NAVIGATION_COMMAND_PATTERN, "").replace(/\s{2,}/g, " ").trim();
+
+const resolveCommandTarget = (value: string): AssistantIntentTarget | null => {
+  const regex = new RegExp(NAVIGATION_COMMAND_PATTERN.source, "gi");
+  let latestMatch: RegExpExecArray | null = null;
+  let currentMatch = regex.exec(value);
+
+  while (currentMatch) {
+    latestMatch = currentMatch;
+    currentMatch = regex.exec(value);
+  }
+
+  if (!latestMatch) return null;
+
+  const [, action, rawTarget] = latestMatch;
+  const normalizedTarget = rawTarget.trim();
+  if (!normalizedTarget) return null;
+
+  if (action === "scroll") {
+    return {
+      kind: "section",
+      value: normalizedTarget.replace(/^#/, ""),
+      reply: "",
+      notice: `Opening ${normalizedTarget.replace(/^#/, "")}...`,
+    };
+  }
+
+  if (normalizedTarget.startsWith("#")) {
+    return {
+      kind: "section",
+      value: normalizedTarget.slice(1),
+      reply: "",
+      notice: `Opening ${normalizedTarget.slice(1)}...`,
+    };
+  }
+
+  return {
+    kind: "route",
+    value: normalizedTarget.startsWith("/") ? normalizedTarget : `/${normalizedTarget}`,
+    reply: "",
+    notice: `Opening ${normalizedTarget.replace(/^\//, "")}...`,
+  };
+};
+
+const classifyConfirmationFallback = (message: string) => {
+  const normalized = message.trim().toLowerCase();
+  if (!normalized) return "unclear" as const;
+
+  if (/(^|\b)(yes|yeah|yep|sure|okay|ok|go ahead|please do|do it|take me there|open it|move me|sounds good|why not)(\b|$)/i.test(normalized)) {
+    return "confirm" as const;
+  }
+
+  if (/(^|\b)(no|nope|nah|not now|stay here|don't|do not|leave it)(\b|$)/i.test(normalized)) {
+    return "reject" as const;
+  }
+
+  return "unclear" as const;
+};
+
 export const SiteAssistantWidget = () => {
+  const router = useRouter();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
-  const [isAboutVisible, setIsAboutVisible] = useState(false);
   const [conversation, setConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<AssistantMessage[]>([]);
   const [inputValue, setInputValue] = useState("");
@@ -87,10 +256,13 @@ export const SiteAssistantWidget = () => {
   const [visitorSessionId, setVisitorSessionId] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [isProfileConfirmed, setIsProfileConfirmed] = useState(false);
+  const [navigationNotice, setNavigationNotice] = useState<string | null>(null);
+  const [pendingNavigationTarget, setPendingNavigationTarget] = useState<AssistantIntentTarget | null>(null);
+  const widgetRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const latestMessageIdRef = useRef<string | null>(null);
-
-  const shouldHideWidget = pathname === "/" && isAboutVisible;
+  const latestOperatorNavigationIdRef = useRef<string | null>(null);
 
   const handleEditProfile = () => {
     setIsEditingProfile(true);
@@ -101,11 +273,109 @@ export const SiteAssistantWidget = () => {
     [visitorName, visitorEmail]
   );
 
+  const canSubmitProfile = useMemo(
+    () => visitorName.trim().length > 1 && isValidEmail(visitorEmail.trim()),
+    [visitorEmail, visitorName]
+  );
+
   const scrollToBottom = useCallback(() => {
     const container = listRef.current;
     if (!container) return;
     container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
   }, []);
+
+  const handleMessageListWheel = useCallback((event: React.WheelEvent<HTMLDivElement>) => {
+    const container = listRef.current;
+    if (!container) return;
+
+    const canScroll = container.scrollHeight > container.clientHeight;
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!canScroll) return;
+
+    const maxScrollTop = container.scrollHeight - container.clientHeight;
+    const nextScrollTop = Math.max(0, Math.min(maxScrollTop, container.scrollTop + event.deltaY));
+    container.scrollTop = nextScrollTop;
+  }, []);
+
+  const pushLocalAssistantMessage = useCallback((content: string) => {
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `local-assistant-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        sender_role: "assistant",
+        sender_label: "SheetalDharshan Assistant",
+        content,
+        created_at: new Date().toISOString(),
+      },
+    ]);
+  }, []);
+
+  const classifyNavigationConfirmation = useCallback(async (message: string) => {
+    try {
+      const response = await fetch("/api/assistant/confirm-navigation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      });
+
+      if (!response.ok) {
+        return classifyConfirmationFallback(message);
+      }
+
+      const data = await response.json();
+      const decision = String(data?.decision || "unclear").toLowerCase();
+      if (decision === "confirm" || decision === "reject" || decision === "unclear") {
+        return decision;
+      }
+
+      return classifyConfirmationFallback(message);
+    } catch {
+      return classifyConfirmationFallback(message);
+    }
+  }, []);
+
+  const jumpToSection = useCallback((sectionId: string) => {
+    if (typeof window === "undefined") return;
+
+    const section = document.getElementById(sectionId);
+    if (section) {
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+
+    window.location.assign(`/#${sectionId}`);
+  }, []);
+
+  const navigateForIntent = useCallback(
+    (target: AssistantIntentTarget) => {
+      setNavigationNotice(target.notice);
+
+      if (target.kind === "route") {
+        router.push(target.value);
+        return;
+      }
+
+      if (pathname === "/") {
+        jumpToSection(target.value);
+        return;
+      }
+
+      window.location.assign(`/#${target.value}`);
+    },
+    [jumpToSection, pathname, router]
+  );
+
+  useEffect(() => {
+    if (!navigationNotice) return;
+
+    const timeoutId = window.setTimeout(() => {
+      setNavigationNotice(null);
+    }, 2400);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [navigationNotice]);
 
   const loadMessages = useCallback(
     async (conversationId: string, options?: { silent?: boolean }) => {
@@ -131,12 +401,33 @@ export const SiteAssistantWidget = () => {
           }
         }
 
-        setMessages(nextMessages);
+        const latestOperatorMessage = [...nextMessages].reverse().find((message) => message.sender_role === "operator");
+        if (latestOperatorMessage && latestOperatorMessage.id !== latestOperatorNavigationIdRef.current) {
+          const operatorIntent = resolveCommandTarget(latestOperatorMessage.content || "");
+          if (operatorIntent) {
+            latestOperatorNavigationIdRef.current = latestOperatorMessage.id;
+            navigateForIntent(operatorIntent);
+          }
+        }
+
+        setMessages((prev) => {
+          const localTransient = prev.filter(
+            (item) => item.id.startsWith("local-assistant-") || item.id.startsWith("local-system-")
+          );
+
+          if (localTransient.length === 0) {
+            return [...nextMessages].sort(byCreatedAtAsc);
+          }
+
+          const serverIds = new Set(nextMessages.map((item) => item.id));
+          const stillLocal = localTransient.filter((item) => !serverIds.has(item.id));
+          return [...nextMessages, ...stillLocal].sort(byCreatedAtAsc);
+        });
       } catch {
         // Ignore fetch errors and continue polling.
       }
     },
-    [isOpen]
+    [isOpen, navigateForIntent]
   );
 
   const ensureConversation = useCallback(
@@ -199,38 +490,36 @@ export const SiteAssistantWidget = () => {
 
     const storedName = localStorage.getItem(VISITOR_NAME_KEY) || "";
     const storedEmail = localStorage.getItem(VISITOR_EMAIL_KEY) || "";
+    const storedConfirmed = localStorage.getItem(VISITOR_PROFILE_CONFIRMED_KEY) === "true";
     setVisitorName(storedName);
     setVisitorEmail(storedEmail);
+    setIsProfileConfirmed(storedConfirmed && !!storedName && !!storedEmail);
   }, []);
 
   useEffect(() => {
-    // Only hide widget on home page when About section is visible
-    if (pathname !== "/") {
-      setIsAboutVisible(false);
-      return;
-    }
+    if (!isOpen) return;
 
-    const section = document.getElementById("about");
-    if (!section) {
-      setIsAboutVisible(false);
-      return;
-    }
+    const handleOutsideClick = (event: MouseEvent) => {
+      const widget = widgetRef.current;
+      if (!widget) return;
+      if (!widget.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
 
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsAboutVisible(entry.isIntersecting),
-      { threshold: 0.1 }
-    );
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    };
 
-    observer.observe(section);
-    return () => observer.disconnect();
-  }, [pathname]);
-
-  useEffect(() => {
-    if (shouldHideWidget) {
-      setIsOpen(false);
-      setUnreadCount(0);
-    }
-  }, [shouldHideWidget]);
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (!conversation?.id) return;
@@ -252,11 +541,13 @@ export const SiteAssistantWidget = () => {
   const handleProfileSubmit = async () => {
     const trimmedName = visitorName.trim();
     const trimmedEmail = visitorEmail.trim();
-    if (!trimmedName || !trimmedEmail) return;
+    if (!canSubmitProfile) return;
 
     localStorage.setItem(VISITOR_NAME_KEY, trimmedName);
     localStorage.setItem(VISITOR_EMAIL_KEY, trimmedEmail);
+    localStorage.setItem(VISITOR_PROFILE_CONFIRMED_KEY, "true");
 
+    setIsProfileConfirmed(true);
     setIsEditingProfile(false);
     const nextConversation = await ensureConversation({ name: trimmedName, email: trimmedEmail });
     if (nextConversation?.id) {
@@ -264,8 +555,46 @@ export const SiteAssistantWidget = () => {
     }
   };
 
-  const sendMessage = async (content: string) => {
-    if (!conversation?.id || (!content.trim() && pendingAttachments.length === 0)) return;
+  const sendMessage = async (content: string, conversationId: string) => {
+    if (!conversationId || (!content.trim() && pendingAttachments.length === 0)) return;
+
+    const trimmedContent = content.trim();
+    let shouldSkipAiResponse = false;
+    const nowIso = new Date().toISOString();
+    const optimisticVisitorMessage: AssistantMessage = {
+      id: `local-visitor-${Date.now()}`,
+      sender_role: "visitor",
+      sender_label: visitorName || "You",
+      content: trimmedContent,
+      created_at: nowIso,
+      attachments: pendingAttachments,
+    };
+
+    setMessages((prev) => [...prev, optimisticVisitorMessage]);
+
+    if (pendingNavigationTarget && pendingAttachments.length === 0) {
+      const decision = await classifyNavigationConfirmation(trimmedContent);
+
+      if (decision === "confirm") {
+        navigateForIntent(pendingNavigationTarget);
+        setPendingNavigationTarget(null);
+        shouldSkipAiResponse = true;
+      } else if (decision === "reject") {
+        pushLocalAssistantMessage("Okay, I will stay on this page. If you want later, just ask me again.");
+        setPendingNavigationTarget(null);
+        return;
+      } else {
+        setPendingNavigationTarget(null);
+      }
+    }
+
+    const matchedIntent = pendingAttachments.length === 0 ? resolveIntentTarget(trimmedContent) : null;
+    if (matchedIntent) {
+      setPendingNavigationTarget(matchedIntent);
+      const targetLabel = matchedIntent.kind === "section" ? "section" : "page";
+      pushLocalAssistantMessage(`${matchedIntent.reply} If you need, I can move you to that ${targetLabel}.`);
+      shouldSkipAiResponse = true;
+    }
 
     setIsSending(true);
     try {
@@ -273,22 +602,25 @@ export const SiteAssistantWidget = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          conversationId: conversation.id,
-          content,
+          conversationId,
+          content: trimmedContent,
           senderRole: "visitor",
           language: "en",
+          skipAiResponse: shouldSkipAiResponse,
           attachments: pendingAttachments,
         }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        const localNew = [data?.message, data?.assistantMessage].filter(Boolean) as AssistantMessage[];
-        if (localNew.length > 0) {
-          setMessages((prev) => [...prev, ...localNew]);
-        }
+        const persistedMessages = [data?.message, data?.assistantMessage].filter(Boolean) as AssistantMessage[];
+        setMessages((prev) => [...prev.filter((item) => item.id !== optimisticVisitorMessage.id), ...persistedMessages]);
         setPendingAttachments([]);
+      } else {
+        setMessages((prev) => prev.filter((item) => item.id !== optimisticVisitorMessage.id));
       }
+    } catch {
+      setMessages((prev) => prev.filter((item) => item.id !== optimisticVisitorMessage.id));
     } finally {
       setIsSending(false);
     }
@@ -329,19 +661,21 @@ export const SiteAssistantWidget = () => {
     if (!payload && pendingAttachments.length === 0) return;
     setInputValue("");
 
-    if (!conversation?.id) {
+    let activeConversationId = conversation?.id || "";
+
+    if (!activeConversationId) {
       const nextConversation = await ensureConversation();
       if (!nextConversation?.id) return;
+      activeConversationId = nextConversation.id;
     }
 
-    await sendMessage(payload);
+    await sendMessage(payload, activeConversationId);
   };
 
   const handleOpen = async () => {
-    if (shouldHideWidget) return;
     setIsOpen((prev) => !prev);
 
-    if (!conversation?.id && hasVisitorProfile) {
+    if (!conversation?.id && hasVisitorProfile && isProfileConfirmed) {
       const nextConversation = await ensureConversation();
       if (nextConversation?.id) {
         await loadMessages(nextConversation.id, { silent: true });
@@ -349,10 +683,8 @@ export const SiteAssistantWidget = () => {
     }
   };
 
-  if (shouldHideWidget) return null;
-
   return (
-    <div className="fixed bottom-4 right-4 z-[95] md:bottom-6 md:right-6">
+    <div ref={widgetRef} className="fixed bottom-4 right-4 z-[95] md:bottom-6 md:right-6">
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -360,15 +692,15 @@ export const SiteAssistantWidget = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.96 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="mb-3 w-[calc(100vw-2rem)] max-w-[360px] overflow-hidden rounded-3xl border border-foreground/10 bg-background/95 shadow-[0_22px_70px_rgba(0,0,0,0.35)] backdrop-blur-xl"
+            className="mb-3 ml-auto flex max-h-[min(78svh,560px)] w-[calc(100vw-1.5rem)] max-w-[338px] flex-col overflow-hidden rounded-[26px] border border-foreground/10 bg-background/95 shadow-[0_18px_48px_rgba(0,0,0,0.32)] backdrop-blur-xl sm:w-[calc(100vw-2rem)]"
           >
-            <div className="flex items-center justify-between border-b border-foreground/10 px-4 py-3">
+            <div className="flex items-center justify-between border-b border-foreground/10 px-3.5 py-2.5">
               <div className="flex items-center gap-2">
-                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-primary/25 bg-primary/10 text-primary">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-primary/25 bg-primary/10 text-primary">
                   <Bot className="h-4 w-4" />
                 </span>
                 <div>
-                  <p className="text-sm font-semibold text-foreground">SheetalDharshan Assistant</p>
+                  <p className="text-[13px] font-semibold text-foreground">SheetalDharshan Assistant</p>
                   <p className="text-[11px] text-foreground/55">
                     <span className={cn("mr-1 inline-block h-1.5 w-1.5 rounded-full", isOnline ? "bg-emerald-500" : "bg-amber-500")} />
                     {isOnline ? "Online now" : "Trying to reconnect"}
@@ -376,7 +708,7 @@ export const SiteAssistantWidget = () => {
                 </div>
               </div>
               <div className="flex items-center gap-1">
-                {hasVisitorProfile && !isEditingProfile && (
+                {isProfileConfirmed && !isEditingProfile && (
                   <button
                     onClick={handleEditProfile}
                     className="rounded-full p-2 text-foreground/55 transition-colors hover:bg-foreground/10 hover:text-foreground"
@@ -396,8 +728,9 @@ export const SiteAssistantWidget = () => {
               </div>
             </div>
 
-            {!hasVisitorProfile || isEditingProfile ? (
-              <div className="space-y-3 p-4">
+            {!isProfileConfirmed || isEditingProfile ? (
+              <div className="overflow-y-auto p-3.5">
+                <div className="space-y-3">
                 <p className="text-xs text-foreground/70">
                   {isEditingProfile ? "Update your details" : "Before we start, share your details so Sheetal can follow up with you."}
                 </p>
@@ -411,7 +744,7 @@ export const SiteAssistantWidget = () => {
                     }
                   }}
                   placeholder="Your name"
-                  className="h-10 w-full rounded-xl border border-foreground/15 bg-background px-3 text-sm text-foreground outline-none focus:border-primary/40"
+                  className="h-9 w-full rounded-xl border border-foreground/15 bg-background px-3 text-sm text-foreground outline-none focus:border-primary/40"
                   autoComplete="name"
                 />
                 <input
@@ -426,12 +759,12 @@ export const SiteAssistantWidget = () => {
                   placeholder="Your email"
                   type="email"
                   autoComplete="email"
-                  className="h-10 w-full rounded-xl border border-foreground/15 bg-background px-3 text-sm text-foreground outline-none focus:border-primary/40"
+                  className="h-9 w-full rounded-xl border border-foreground/15 bg-background px-3 text-sm text-foreground outline-none focus:border-primary/40"
                 />
                 <button
                   onClick={handleProfileSubmit}
-                  disabled={!visitorName.trim() || !visitorEmail.trim()}
-                  className="h-10 w-full rounded-xl bg-foreground text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={!canSubmitProfile}
+                  className="h-9 w-full rounded-xl bg-foreground text-sm font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isEditingProfile ? "Update profile" : "Start chat"}
                 </button>
@@ -442,15 +775,20 @@ export const SiteAssistantWidget = () => {
                       setVisitorName(localStorage.getItem(VISITOR_NAME_KEY) || "");
                       setVisitorEmail(localStorage.getItem(VISITOR_EMAIL_KEY) || "");
                     }}
-                    className="h-10 w-full rounded-xl border border-foreground/15 text-sm font-medium text-foreground transition-colors hover:bg-foreground/5"
+                    className="h-9 w-full rounded-xl border border-foreground/15 text-sm font-medium text-foreground transition-colors hover:bg-foreground/5"
                   >
                     Cancel
                   </button>
                 )}
+                </div>
               </div>
             ) : (
               <>
-                <div ref={listRef} className="max-h-[380px] min-h-[280px] space-y-2 overflow-y-auto px-3 py-3">
+                <div
+                  ref={listRef}
+                  onWheel={handleMessageListWheel}
+                  className="assistant-scroll min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain px-3 py-2.5"
+                >
                   {messages.length === 0 && (
                     <div className="rounded-2xl border border-foreground/10 bg-foreground/[0.03] px-3 py-2 text-xs text-foreground/70">
                       Hi {visitorName || "there"}, ask anything about Sheetal. AI replies instantly, and Sheetal can jump in anytime.
@@ -458,18 +796,19 @@ export const SiteAssistantWidget = () => {
                   )}
                   {messages.map((message) => {
                     const isVisitor = message.sender_role === "visitor";
+                    const displayContent = sanitizeMessageContent(message.content || "");
                     return (
                       <div key={message.id} className={cn("flex w-full", isVisitor ? "justify-end" : "justify-start")}>
                         <div
                           className={cn(
-                            "max-w-[85%] rounded-2xl px-3 py-2 text-sm",
+                            "max-w-[85%] rounded-2xl px-3 py-2 text-[13px]",
                             isVisitor
                               ? "rounded-br-md bg-foreground text-background"
                               : "rounded-bl-md border border-foreground/10 bg-foreground/[0.03] text-foreground"
                           )}
                         >
                           {!isVisitor && <p className="mb-1 text-[10px] uppercase tracking-[0.14em] text-foreground/45">{message.sender_label}</p>}
-                          <p className="whitespace-pre-wrap leading-5">{message.content}</p>
+                          {displayContent && <p className="whitespace-pre-wrap leading-5">{displayContent}</p>}
                           {Array.isArray(message.attachments) && message.attachments.length > 0 && (
                             <div className="mt-2 space-y-1.5">
                               {message.attachments.map((attachment) => (
@@ -507,6 +846,11 @@ export const SiteAssistantWidget = () => {
                 </div>
 
                 <div className="border-t border-foreground/10 px-3 py-2">
+                  {navigationNotice && (
+                    <div className="mb-2 inline-flex items-center rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-foreground/80">
+                      {navigationNotice}
+                    </div>
+                  )}
                   {pendingAttachments.length > 0 && (
                     <div className="mb-2 flex flex-wrap gap-1.5">
                       {pendingAttachments.map((attachment) => (
@@ -526,10 +870,10 @@ export const SiteAssistantWidget = () => {
                       ))}
                     </div>
                   )}
-                  <div className="flex items-center gap-2 rounded-2xl border border-foreground/15 bg-background px-2">
-                    <label className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full text-foreground/70 transition-colors hover:bg-foreground/10 hover:text-foreground">
+                  <div className="flex items-center gap-1.5 rounded-2xl border border-foreground/15 bg-background px-2 py-1">
+                    <label className="inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-full text-foreground/70 transition-colors hover:bg-foreground/10 hover:text-foreground">
                       <input type="file" className="hidden" onChange={handleFileUpload} />
-                      <Paperclip className="h-4 w-4" />
+                      <Paperclip className="h-3.5 w-3.5" />
                     </label>
                     <input
                       value={inputValue}
@@ -541,15 +885,15 @@ export const SiteAssistantWidget = () => {
                         }
                       }}
                       placeholder="Type your message..."
-                      className="h-10 w-full bg-transparent px-2 text-sm text-foreground outline-none placeholder:text-foreground/35"
+                      className="h-8 w-full bg-transparent px-1.5 text-sm text-foreground outline-none placeholder:text-foreground/35"
                     />
                     <button
                       onClick={handleSend}
                       disabled={isSending || isUploadingAttachment || (inputValue.trim().length === 0 && pendingAttachments.length === 0)}
-                      className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-foreground text-background transition-all disabled:opacity-50"
+                      className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-foreground text-background transition-all disabled:opacity-50"
                       aria-label="Send message"
                     >
-                      <Send className="h-3.5 w-3.5" />
+                      <Send className="h-3 w-3" />
                     </button>
                   </div>
                 </div>
@@ -561,7 +905,7 @@ export const SiteAssistantWidget = () => {
 
       <button
         onClick={handleOpen}
-        className="group relative inline-flex h-14 w-14 items-center justify-center rounded-full border border-primary/35 bg-foreground text-background shadow-[0_16px_40px_rgba(0,0,0,0.35)] transition-transform hover:scale-[1.03]"
+        className="group relative ml-auto flex h-14 w-14 items-center justify-center rounded-full border border-primary/35 bg-foreground text-background shadow-[0_16px_40px_rgba(0,0,0,0.35)]"
         aria-label="Open assistant"
       >
         <MessageCircle className="h-6 w-6" />
@@ -575,6 +919,33 @@ export const SiteAssistantWidget = () => {
           Chat with Sheetal
         </span>
       </button>
+
+      <style jsx global>{`
+        .assistant-scroll {
+          scrollbar-width: thin;
+          scrollbar-color: rgba(120, 120, 130, 0.65) transparent;
+        }
+
+        .assistant-scroll::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        .assistant-scroll::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        .assistant-scroll::-webkit-scrollbar-thumb {
+          background: linear-gradient(180deg, rgba(120, 120, 130, 0.85), rgba(80, 80, 90, 0.8));
+          border-radius: 999px;
+          border: 2px solid transparent;
+          background-clip: padding-box;
+        }
+
+        .assistant-scroll::-webkit-scrollbar-thumb:hover {
+          background: linear-gradient(180deg, rgba(150, 150, 165, 0.95), rgba(96, 96, 112, 0.9));
+          background-clip: padding-box;
+        }
+      `}</style>
     </div>
   );
 };

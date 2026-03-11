@@ -55,7 +55,7 @@ export const ProjectsSection = () => {
     if (loading) return null; // Or a skeleton
 
     return (
-        <section className="py-24 px-6 max-w-7xl mx-auto relative overflow-hidden">
+        <section id="projects" className="py-24 px-6 max-w-7xl mx-auto relative overflow-hidden">
             {/* Premium "Gaurdial" (Radial) Gradient background */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/10 rounded-full blur-[120px] pointer-events-none opacity-50 animate-pulse-glow" />
             <div className="absolute top-1/4 -left-20 w-[400px] h-[400px] bg-accent/10 rounded-full blur-[100px] pointer-events-none opacity-30" />

@@ -27,7 +27,7 @@ const SkillChip = ({ name, icon: Icon }: { name: string; icon: React.ElementType
 
 export const SkillsMarquee = () => {
     return (
-        <section className="py-20 overflow-hidden border-t border-foreground/5">
+        <section id="skills" className="py-20 overflow-hidden border-t border-foreground/5">
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
