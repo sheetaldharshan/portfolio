@@ -1,0 +1,712 @@
+/* ═══════════════════════════════════════════════════════
+   REFERENCE PORTFOLIO SECTIONS — Custom CSS
+   Landing • About • WhatIDo
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+    --ref-accent: #c2a4ff;
+    --ref-vh: 100vh;
+    --ref-vh: 100svh;
+}
+
+/* ─── LANDING SECTION ─── */
+.ref-landing {
+    width: 100%;
+    position: relative;
+    min-height: var(--ref-vh);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.ref-landing-container {
+    width: 100%;
+    max-width: 1800px;
+    margin: 0 auto;
+    height: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--ref-vh);
+    padding: 0;
+}
+
+/* Floating glow circles */
+.ref-landing-circle1 {
+    position: absolute;
+    top: -150px;
+    left: -150px;
+    z-index: 0;
+    width: 300px;
+    height: 300px;
+    background-color: #fb8dff;
+    box-shadow: inset -50px 40px 50px rgba(84, 0, 255, 0.6);
+    filter: blur(80px);
+    border-radius: 50%;
+    animation: ref-circleFloat 8s ease-in-out infinite;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.ref-landing-circle2 {
+    position: absolute;
+    bottom: -100px;
+    right: -100px;
+    z-index: 0;
+    width: 250px;
+    height: 250px;
+    background-color: #fb8dff;
+    box-shadow: inset -50px 40px 50px rgba(84, 0, 255, 0.6);
+    filter: blur(70px);
+    border-radius: 50%;
+    animation: ref-circleFloat2 10s ease-in-out infinite;
+    pointer-events: none;
+    opacity: 0.4;
+}
+
+@keyframes ref-circleFloat {
+
+    0%,
+    100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+
+    50% {
+        transform: translate(30px, 20px) rotate(180deg);
+    }
+}
+
+@keyframes ref-circleFloat2 {
+
+    0%,
+    100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+
+    50% {
+        transform: translate(-20px, -30px) rotate(180deg);
+    }
+}
+
+.ref-landing-intro {
+    position: relative;
+    z-index: 9;
+    margin-top: 25px;
+}
+
+.ref-landing-intro h2 {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: 20px;
+    letter-spacing: 0.1em;
+    color: var(--ref-accent);
+    font-family: var(--font-display);
+    text-transform: uppercase;
+}
+
+.ref-landing-intro h1 {
+    margin: 0;
+    letter-spacing: 3px;
+    font-size: 28px;
+    line-height: 1;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.ref-landing-intro h1 span {
+    color: hsl(var(--foreground) / 0.7);
+}
+
+.ref-landing-info {
+    position: relative;
+    z-index: 9;
+    text-align: center;
+}
+
+.ref-landing-info h3 {
+    font-size: 18px;
+    letter-spacing: 2px;
+    font-weight: 300;
+    color: var(--ref-accent);
+    margin: 0;
+}
+
+.ref-landing-role {
+    margin: 0;
+    font-weight: 600;
+    font-size: 28px;
+    line-height: 40px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    white-space: nowrap;
+}
+
+.ref-landing-role-accent {
+    color: var(--ref-accent);
+    font-size: 36px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Desktop: Side-by-side layout */
+@media screen and (min-width: 1025px) {
+    .ref-landing-container {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .ref-landing-intro {
+        text-align: left;
+    }
+
+    .ref-landing-info {
+        text-align: left;
+    }
+
+    .ref-landing-intro h1 {
+        font-size: 50px;
+        line-height: 48px;
+    }
+
+    .ref-landing-intro h2 {
+        font-size: 28px;
+    }
+
+    .ref-landing-info h3 {
+        font-size: 25px;
+    }
+
+    .ref-landing-role {
+        font-size: 45px;
+        line-height: 48px;
+    }
+
+    .ref-landing-role-accent {
+        font-size: 55px;
+    }
+
+    .ref-landing-center {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .ref-landing-chatbot-mobile {
+        display: none;
+    }
+}
+
+/* Medium Desktop: Prevents clipping on 1025px - 1400px */
+@media screen and (min-width: 1025px) and (max-width: 1400px) {
+    .ref-landing-intro h1 {
+        font-size: 38px;
+        line-height: 36px;
+    }
+
+    .ref-landing-role-accent {
+        font-size: 38px;
+    }
+
+    .ref-landing-role {
+        font-size: 28px;
+        line-height: 32px;
+    }
+}
+
+/* Tablet */
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+    .ref-landing-intro h1 {
+        font-size: 40px;
+        line-height: 38px;
+    }
+
+    .ref-landing-intro h2 {
+        font-size: 22px;
+    }
+
+    .ref-landing-role {
+        font-size: 35px;
+        line-height: 40px;
+    }
+
+    .ref-landing-role-accent {
+        font-size: 42px;
+    }
+}
+
+/* Mobile: stacked vertically */
+@media screen and (max-width: 1024px) {
+    .ref-landing-container {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        text-align: center;
+        padding-top: 100px;
+        padding-bottom: 40px;
+    }
+
+    .ref-landing-intro {
+        order: 1;
+    }
+
+    .ref-landing-center {
+        order: 2;
+    }
+
+    .ref-landing-info {
+        order: 3;
+    }
+
+    .ref-landing-chatbot-mobile {
+        order: 4;
+        width: 100%;
+        padding: 0 10px;
+    }
+}
+
+/* XL screens */
+@media screen and (min-width: 1600px) {
+    .ref-landing-intro h2 {
+        font-size: 35px;
+    }
+
+    .ref-landing-intro h1 {
+        font-size: 65px;
+        line-height: 60px;
+    }
+
+    .ref-landing-info h3 {
+        font-size: 35px;
+    }
+
+    .ref-landing-role {
+        font-size: 60px;
+        line-height: 58px;
+    }
+
+    .ref-landing-role-accent {
+        font-size: 70px;
+    }
+}
+
+
+/* ─── ABOUT SECTION ─── */
+.ref-about {
+    position: relative;
+    width: 100%;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+/* These sub-classes can be removed as they are handled by Tailwind in AboutSection.tsx */
+.ref-about-content,
+.ref-about-content h2,
+.ref-about-content p {
+    display: none;
+}
+
+
+/* ─── WHAT I DO SECTION ─── */
+.ref-whatido {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    min-height: 100vh;
+    width: 94%;
+    max-width: 1400px;
+    margin: auto;
+    z-index: 9;
+    padding: 60px 0;
+}
+
+.ref-what-box {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    position: relative;
+    z-index: 9;
+}
+
+.ref-what-box h2 {
+    font-family: var(--font-elnath);
+    font-size: clamp(2.75rem, 5vw, 5rem);
+    line-height: 1.05;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    text-transform: uppercase;
+    text-align: right;
+    opacity: 0.9;
+    margin: 0;
+    margin-right: 0;
+    margin-bottom: 2rem;
+}
+
+.ref-hat-h2 {
+    font-style: italic;
+}
+
+.ref-do-h2 {
+    display: inline-block;
+    background: linear-gradient(to right, #9333ea, #d946ef, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    padding-right: 0.15em;
+    margin-right: -0.15em;
+}
+
+.ref-what-box-in {
+    flex-direction: column;
+    height: 500px;
+    margin-left: 100px;
+    position: relative;
+    display: flex;
+}
+
+.ref-what-content {
+    width: 450px;
+    height: 33%;
+    min-height: 50%;
+    transition: 0.5s;
+    position: relative;
+    padding: 50px;
+    box-sizing: border-box;
+}
+
+.ref-what-content:hover {
+    min-height: 67%;
+    padding: 40px 50px;
+}
+
+.ref-what-content:hover~.ref-what-content {
+    min-height: 33%;
+    padding: 10px 50px;
+}
+
+/* Corner brackets */
+.ref-what-content::before,
+.ref-what-corner::before,
+.ref-what-content::after,
+.ref-what-corner::after {
+    content: "";
+    width: 10px;
+    height: 10px;
+    position: absolute;
+    border: 4px solid hsl(var(--foreground));
+    opacity: 0.6;
+}
+
+.ref-what-content::before {
+    top: -2px;
+    left: -2px;
+    border-right: none;
+    border-bottom: none;
+}
+
+.ref-what-corner::before {
+    top: -2px;
+    right: -2px;
+    border-left: none;
+    border-bottom: none;
+}
+
+.ref-what-content::after {
+    bottom: -2px;
+    left: -2px;
+    border-top: none;
+    border-right: none;
+}
+
+.ref-what-corner::after {
+    bottom: -2px;
+    right: -2px;
+    border-left: none;
+    border-top: none;
+}
+
+/* Dashed borders */
+.ref-what-border1 {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 100%;
+    opacity: 0.2;
+    pointer-events: none;
+}
+
+.ref-what-border1 svg {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 450px;
+}
+
+.ref-what-border2 {
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    left: 0;
+    transform: translateY(-50%);
+    height: 100%;
+    opacity: 0.2;
+    pointer-events: none;
+}
+
+.ref-what-border2 svg {
+    height: 500px;
+    top: 50%;
+    transform: translateY(-50%);
+    position: absolute;
+}
+
+.ref-what-content-in {
+    height: 100%;
+    overflow: hidden;
+}
+
+.ref-what-content h3 {
+    font-family: var(--font-elnath);
+    font-size: clamp(1.75rem, 2vw, 2rem);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 600;
+    opacity: 0.9;
+    margin: 0;
+    color: hsl(var(--foreground));
+}
+
+.ref-what-content h4 {
+    font-weight: 300;
+    letter-spacing: 0.06em;
+    margin: 0;
+    font-size: clamp(0.75rem, 1vw, 0.9rem);
+    opacity: 0.5;
+    color: hsl(var(--foreground));
+}
+
+.ref-what-content p {
+    font-size: clamp(0.9rem, 1vw, 1rem);
+    line-height: 1.6;
+    font-weight: 300;
+    letter-spacing: 0.02em;
+    color: hsl(var(--foreground) / 0.8);
+}
+
+.ref-what-content-in h5 {
+    font-weight: 300;
+    opacity: 0.6;
+    font-size: clamp(0.7rem, 1vw, 0.75rem);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    color: hsl(var(--foreground));
+}
+
+.ref-what-content-flex {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.ref-what-tags {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 8px;
+    background-color: hsl(var(--foreground) / 0.08);
+    border: 1px solid hsl(var(--foreground) / 0.15);
+    border-radius: 30px;
+    color: hsl(var(--foreground) / 0.8);
+    transition: 0.3s;
+}
+
+.ref-what-tags:hover {
+    background-color: hsl(var(--foreground) / 0.15);
+    border-color: var(--ref-accent);
+    color: var(--ref-accent);
+}
+
+.ref-what-arrow {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 25px;
+    height: 25px;
+    border: 1px solid hsl(var(--foreground) / 0.3);
+    transition: 0.3s;
+}
+
+.ref-what-arrow::before {
+    content: "";
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    border-left: 1px solid hsl(var(--foreground) / 0.5);
+    border-bottom: 1px solid hsl(var(--foreground) / 0.5);
+    transition: 0.5s;
+    width: 10px;
+    height: 10px;
+}
+
+.ref-what-content:hover .ref-what-arrow::before {
+    transform: translate(-50%, -20%) rotate(-225deg);
+}
+
+/* Responsive */
+@media only screen and (max-width: 1400px) {
+    .ref-what-box h2 {
+        margin-right: 0;
+    }
+
+    .ref-what-box-in {
+        height: 400px;
+        margin-left: 50px;
+    }
+
+    .ref-what-content h3 {
+        font-size: clamp(1.5rem, 1.8vw, 1.75rem);
+    }
+
+    .ref-what-content {
+        padding: 30px;
+        width: 400px;
+    }
+
+    .ref-what-content p {
+        font-size: 0.9rem;
+    }
+
+    .ref-what-content:hover {
+        padding: 20px 30px;
+    }
+
+    .ref-what-content:hover~.ref-what-content {
+        padding: 10px 30px;
+    }
+
+    .ref-what-tags {
+        font-size: 10px;
+    }
+}
+
+@media only screen and (min-width: 1024px) {
+    .ref-what-box h2 {
+        text-align: left;
+        margin-bottom: 2.5rem;
+    }
+}
+
+@media only screen and (max-width: 1024px) {
+    .ref-whatido {
+        min-height: auto;
+        padding: 50px 0;
+    }
+
+    .ref-what-box-in {
+        height: 500px;
+        margin-left: -50px;
+    }
+
+    .ref-what-content {
+        padding: 50px;
+        width: 500px;
+    }
+}
+
+@media only screen and (max-width: 900px) {
+    .ref-whatido {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .ref-what-box h2 {
+        margin: 30px 0;
+        font-size: 62px;
+        line-height: 58px;
+    }
+
+    .ref-what-box:first-child {
+        justify-content: flex-start;
+    }
+
+    .ref-what-box:last-child {
+        height: 500px;
+    }
+
+    .ref-what-box {
+        width: 500px;
+        max-width: calc(100% - 50px);
+        margin: 0 auto;
+    }
+
+    .ref-what-content {
+        width: 100%;
+    }
+
+    .ref-what-box-in {
+        margin-left: 0;
+        height: 450px;
+        width: 100%;
+    }
+
+    .ref-what-content h5,
+    .ref-what-content-flex {
+        opacity: 0;
+        transition: 0.3s;
+    }
+
+    .ref-what-content:hover h5,
+    .ref-what-content:hover .ref-what-content-flex {
+        opacity: 1;
+    }
+
+    .ref-what-content {
+        padding: 30px;
+    }
+
+    .ref-what-content p {
+        font-size: 11px;
+    }
+
+    .ref-what-content:hover {
+        padding: 10px 30px;
+    }
+
+    .ref-what-tags {
+        font-size: 11px;
+    }
+
+    .ref-what-content:hover~.ref-what-content {
+        padding: 5px 30px;
+    }
+
+    .ref-what-content h3 {
+        font-size: 25px;
+    }
+}
+
+@media only screen and (max-width: 550px) {
+    .ref-whatido {
+        align-items: flex-start;
+        justify-content: flex-start;
+    }
+
+    .ref-what-box {
+        max-width: calc(100% - 25px);
+        margin: 0;
+    }
+}
+
+@media only screen and (min-width: 1950px) {
+    .ref-what-box h2 {
+        font-size: 7rem;
+        line-height: 6.8rem;
+    }
+}

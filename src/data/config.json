@@ -1,0 +1,769 @@
+{
+    "personal": {
+        "firstName": "SHEETAL",
+        "lastName": "DHARSHAN A",
+        "displayName": "SheetalDharshan A",
+        "navDisplayName": "Sheetal_Dharshan_",
+        "email": "hello@sheetal.dev",
+        "location": "India",
+        "role": "Full-Stack Developer & AI Enthusiast",
+        "roleParts": {
+            "line1": "Full-Stack",
+            "connector": "&",
+            "line2": "AI Developer"
+        },
+        "avatarUrl": "/images/avatar.jpg",
+        "logoUrl": "/site-logo.svg"
+    },
+    "metadata": {
+        "title": "SheetalDharshan A | Portfolio",
+        "description": "Full-stack developer & AI Enthusiast crafting stunning digital experiences. View my work, hire me, or book a call.",
+        "ogTitle": "SheetalDharshan A | Portfolio",
+        "ogDescription": "Full-stack developer & AI Enthusiast crafting stunning digital experiences."
+    },
+    "navigation": {
+        "links": [
+            {
+                "name": "Home",
+                "href": "/"
+            },
+            {
+                "name": "About",
+                "href": "/about"
+            },
+            {
+                "name": "Work",
+                "href": "/work"
+            },
+            {
+                "name": "Blog",
+                "href": "/blog"
+            },
+            {
+                "name": "Hire Me",
+                "href": "/hire-me"
+            }
+        ],
+        "ctaLabel": "Book a Call",
+        "ctaHref": "/book-a-call",
+        "mobileFooterText": "Sheetal Dharshan • Portfolio"
+    },
+    "social": {
+        "links": [
+            {
+                "platform": "GitHub",
+                "url": "https://github.com",
+                "icon": "Github"
+            },
+            {
+                "platform": "Twitter",
+                "url": "https://twitter.com",
+                "icon": "Twitter"
+            },
+            {
+                "platform": "LinkedIn",
+                "url": "https://linkedin.com",
+                "icon": "Linkedin"
+            },
+            {
+                "platform": "Email",
+                "url": "mailto:hello@sheetal.dev",
+                "icon": "Mail"
+            }
+        ]
+    },
+    "home": {
+        "greeting": "Hello! I'm",
+        "heroSectionTitle": "GET 2 KNOW ME",
+        "cta": {
+            "title": "Ready to build something",
+            "accent": "amazing",
+            "description": "Whether you need a stunning website, a complex web application, or just want to chat about ideas — I'm here to help bring your vision to life.",
+            "primaryButton": {
+                "label": "Hire Me",
+                "href": "/hire-me"
+            },
+            "secondaryButton": {
+                "label": "Book a Call",
+                "href": "/book-a-call"
+            }
+        },
+        "about": {
+            "sectionTitle": "ABOUT ME",
+            "bio": "I am a passionate <span class=\"text-white font-medium\">Full-Stack Developer</span> & <span class=\"text-purple-400 font-medium italic\">AI Enthusiast</span> from India, dedicated to the art of building software that feels alive. My journey is fueled by a curiosity for how <span class=\"text-white\">intelligent systems</span> can simplify our complex world.",
+            "bioSub": "I don't just write code; I craft scalable architectures and <span class=\"gradient-text font-medium italic\">stunning digital narratives</span>. From the logic of Next.js to the hidden wonders of AI, I'm always looking for the next boundary to push. Code is my poetry, and innovation is my canvas.",
+            "skills": [
+                "React",
+                "Next.js",
+                "Node.js",
+                "Python",
+                "AI",
+                "ML",
+                "Tailwind",
+                "TypeScript"
+            ],
+            "codeBlock": {
+                "name": "SheetalDharshan A",
+                "passion": "Building",
+                "mode": "Developement"
+            },
+            "quote": "Innovation is the ability to see change as an opportunity, not a threat."
+        },
+        "whatIDo": {
+            "skillCategories": {
+                "develop": {
+                    "title": "FULL-STACK",
+                    "description": "Modern web development & scalable applications",
+                    "details": "Building responsive and performant web applications using React, Next.js, Node.js, and databases. Creating seamless user experiences with modern UI/UX principles and cutting-edge frameworks.",
+                    "tools": [
+                        "React",
+                        "Next.js",
+                        "Node.js",
+                        "TypeScript",
+                        "MongoDB",
+                        "PostgreSQL",
+                        "Tailwind CSS",
+                        "REST APIs",
+                        "Docker",
+                        "Git"
+                    ]
+                },
+                "design": {
+                    "title": "AI ENTHUSIAST",
+                    "description": "Building intelligent systems & AI solutions",
+                    "details": "Exploring AI-powered tools, machine learning models, and intelligent automation. Passionate about integrating AI capabilities into modern web applications to create smarter user experiences.",
+                    "tools": [
+                        "Python",
+                        "TensorFlow",
+                        "OpenAI",
+                        "LangChain",
+                        "NLP",
+                        "Data Analysis",
+                        "Automation",
+                        "AI Agents",
+                        "FastAPI",
+                        "Supabase"
+                    ]
+                }
+            }
+        },
+        "bentoGrid": {
+            "sectionTitle": "What I",
+            "sectionAccent": "bring to the table",
+            "sectionSubtitle": "A blend of technical expertise, creative thinking, and dedication to quality",
+            "aboutCard": {
+                "name": "Sheetal",
+                "description": "A passionate Full-Stack Developer dedicated to building futuristic and innovative digital solutions that make an impact."
+            },
+            "techCard": {
+                "title": "Enthusiastic About Innovative and futuristic Tech",
+                "badgeRows": [
+                    {
+                        "direction": "left",
+                        "speed": 30,
+                        "badges": [
+                            {
+                                "label": "React",
+                                "icon": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/react/react-original.svg"
+                            },
+                            {
+                                "label": "Next.js",
+                                "icon": "https://cdn.simpleicons.org/nextdotjs/white"
+                            },
+                            {
+                                "label": "Tailwind CSS",
+                                "icon": "https://cdn.simpleicons.org/tailwindcss/06B6D4"
+                            },
+                            {
+                                "label": "TypeScript",
+                                "icon": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/typescript/typescript-original.svg"
+                            },
+                            {
+                                "label": "JavaScript",
+                                "icon": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/javascript/javascript-original.svg"
+                            }
+                        ]
+                    },
+                    {
+                        "direction": "right",
+                        "speed": 35,
+                        "badges": [
+                            {
+                                "label": "Node.js",
+                                "icon": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nodejs/nodejs-original.svg"
+                            },
+                            {
+                                "label": "Express.js",
+                                "icon": "https://cdn.simpleicons.org/express/white"
+                            },
+                            {
+                                "label": "MongoDB",
+                                "icon": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/mongodb/mongodb-original.svg"
+                            },
+                            {
+                                "label": "Supabase",
+                                "icon": "https://cdn.simpleicons.org/supabase/3ECF8E"
+                            },
+                            {
+                                "label": "Postman",
+                                "icon": "https://cdn.simpleicons.org/postman/FF6C37"
+                            }
+                        ]
+                    },
+                    {
+                        "direction": "left",
+                        "speed": 40,
+                        "badges": [
+                            {
+                                "label": "Vercel",
+                                "icon": "https://cdn.simpleicons.org/vercel/white"
+                            },
+                            {
+                                "label": "Github",
+                                "icon": "https://cdn.simpleicons.org/github/white"
+                            },
+                            {
+                                "label": "Git",
+                                "icon": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/git/git-original.svg"
+                            },
+                            {
+                                "label": "Figma",
+                                "icon": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/figma/figma-original.svg"
+                            },
+                            {
+                                "label": "VS Code",
+                                "icon": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vscode/vscode-original.svg"
+                            }
+                        ]
+                    }
+                ]
+            },
+            "emailCard": {
+                "title": "Want to start a project together?"
+            },
+            "projectsCard": {
+                "title": "Real-world projects that demand excellence",
+                "subtitle": "Click to explore my live portfolio"
+            }
+        },
+        "skillsMarquee": {
+            "sectionLabel": "Technologies",
+            "sectionTitle": "Tools I",
+            "sectionAccent": "Work With",
+            "skills": [
+                {
+                    "name": "React",
+                    "iconKey": "Code2"
+                },
+                {
+                    "name": "Next.js",
+                    "iconKey": "Layers"
+                },
+                {
+                    "name": "TypeScript",
+                    "iconKey": "Terminal"
+                },
+                {
+                    "name": "Node.js",
+                    "iconKey": "Cpu"
+                },
+                {
+                    "name": "Python",
+                    "iconKey": "Code2"
+                },
+                {
+                    "name": "PostgreSQL",
+                    "iconKey": "Database"
+                },
+                {
+                    "name": "MongoDB",
+                    "iconKey": "Database"
+                },
+                {
+                    "name": "Docker",
+                    "iconKey": "Container"
+                },
+                {
+                    "name": "AWS",
+                    "iconKey": "Cloud"
+                },
+                {
+                    "name": "Tailwind",
+                    "iconKey": "Palette"
+                },
+                {
+                    "name": "Git",
+                    "iconKey": "GitBranch"
+                },
+                {
+                    "name": "Redis",
+                    "iconKey": "Zap"
+                },
+                {
+                    "name": "GraphQL",
+                    "iconKey": "Globe"
+                },
+                {
+                    "name": "Security",
+                    "iconKey": "Shield"
+                }
+            ]
+        },
+        "projectsSection": {
+            "sectionTitle": "Selected",
+            "sectionAccent": "Works & Projects",
+            "sectionSubtitle": "A gallery of technical challenges solved through code and creativity.",
+            "mockProjects": [
+                {
+                    "id": "1",
+                    "title": "AI Portfolio",
+                    "description": "A high-performance portfolio website built with Next.js, featuring an integrated AI replica of myself to handle visitor inquiries. Optimized for SEO and accessibility.",
+                    "image_url": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=1200",
+                    "tags": [
+                        "Next.js",
+                        "Tailwind",
+                        "Framer Motion",
+                        "Supabase"
+                    ],
+                    "featured": true,
+                    "order": 1,
+                    "github_link": "#",
+                    "link": "#"
+                },
+                {
+                    "id": "2",
+                    "title": "Hexoran Web",
+                    "description": "A futuristic web dashboard for infrastructure monitoring with real-time data visualization and geometric UI elements.",
+                    "image_url": "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=800",
+                    "tags": [
+                        "React",
+                        "Three.js",
+                        "Node.js"
+                    ],
+                    "featured": false,
+                    "order": 2,
+                    "github_link": "#"
+                },
+                {
+                    "id": "3",
+                    "title": "Commerce Core",
+                    "description": "A headless e-commerce engine focusing on speed and developer experience. Integrated with Stripe and many other services.",
+                    "image_url": "https://images.unsplash.com/photo-1557821552-17105176677c?auto=format&fit=crop&q=80&w=800",
+                    "tags": [
+                        "TypeScript",
+                        "PostgreSQL",
+                        "Stripe"
+                    ],
+                    "featured": false,
+                    "order": 3,
+                    "link": "#"
+                }
+            ]
+        }
+    },
+    "projects": [
+        {
+            "id": "music-app",
+            "title": "Harmony Stream",
+            "description": "Full-stack music streaming platform with offline playback and smart playlists.",
+            "longDescription": "A complete music streaming experience built with React, Node.js, and PostgreSQL. Features include offline playback, AI-powered playlist generation, and real-time synchronization across devices.",
+            "image": "/images/project-1.jpg",
+            "tags": [
+                "React",
+                "Node.js",
+                "PostgreSQL",
+                "Redis",
+                "WebSocket"
+            ],
+            "category": "Full-stack",
+            "link": "https://example.com",
+            "github": "https://github.com",
+            "featured": true
+        },
+        {
+            "id": "analytics-dashboard",
+            "title": "InsightPulse",
+            "description": "Real-time analytics dashboard with interactive data visualizations.",
+            "longDescription": "Enterprise-grade analytics platform featuring real-time data streaming, customizable dashboards, and predictive analytics powered by machine learning models.",
+            "image": "/images/project-2.jpg",
+            "tags": [
+                "Next.js",
+                "Python",
+                "FastAPI",
+                "D3.js",
+                "Redis"
+            ],
+            "category": "Dashboard",
+            "link": "https://example.com",
+            "featured": true
+        },
+        {
+            "id": "ai-processor",
+            "title": "DocuMind AI",
+            "description": "Intelligent document extraction and processing tool powered by AI.",
+            "longDescription": "An AI-powered document processing tool that extracts, classifies, and summarizes documents with high accuracy. Built with Python, FastAPI, and integrated with multiple LLM providers.",
+            "image": "/images/project-3.jpg",
+            "tags": [
+                "Python",
+                "FastAPI",
+                "OpenAI",
+                "React",
+                "Docker"
+            ],
+            "category": "AI/ML",
+            "github": "https://github.com",
+            "featured": true
+        },
+        {
+            "id": "ecommerce",
+            "title": "ShopVibe",
+            "description": "Modern e-commerce platform with seamless checkout experience.",
+            "longDescription": "A high-conversion e-commerce platform with features like real-time inventory, Stripe payments, and a headless CMS for product management.",
+            "image": "/images/project-4.jpg",
+            "tags": [
+                "Next.js",
+                "Stripe",
+                "Sanity",
+                "Tailwind CSS"
+            ],
+            "category": "E-commerce",
+            "link": "https://example.com",
+            "featured": false
+        },
+        {
+            "id": "portfolio-builder",
+            "title": "FolioKit",
+            "description": "Drag-and-drop portfolio builder for creative professionals.",
+            "longDescription": "A no-code portfolio builder with beautiful templates, custom domains, and SEO optimization. Built for designers, developers, and creatives.",
+            "image": "/images/project-5.jpg",
+            "tags": [
+                "React",
+                "TypeScript",
+                "DnD Kit",
+                "Supabase"
+            ],
+            "category": "SaaS",
+            "featured": false
+        },
+        {
+            "id": "chat-platform",
+            "title": "Converso",
+            "description": "Real-time chat platform with video calls and file sharing.",
+            "longDescription": "A modern communication platform supporting text, voice, and video with end-to-end encryption, file sharing, and real-time collaboration features.",
+            "image": "/images/project-6.jpg",
+            "tags": [
+                "Next.js",
+                "WebRTC",
+                "Socket.io",
+                "MongoDB"
+            ],
+            "category": "Full-stack",
+            "featured": false
+        }
+    ],
+    "projectCategories": [
+        "All",
+        "Full-stack",
+        "Dashboard",
+        "AI/ML",
+        "E-commerce",
+        "SaaS"
+    ],
+    "blogPosts": [
+        {
+            "id": "modern-web-architecture",
+            "title": "Building Modern Web Architecture in 2026",
+            "excerpt": "A deep dive into the latest patterns and best practices for building scalable, maintainable web applications with Next.js and microservices.",
+            "date": "2026-02-15",
+            "readingTime": "8 min",
+            "tags": [
+                "Architecture",
+                "Next.js",
+                "Web Dev"
+            ],
+            "image": "/images/blog-1.jpg",
+            "featured": true
+        },
+        {
+            "id": "ai-in-development",
+            "title": "How AI is Transforming Developer Workflows",
+            "excerpt": "Exploring how AI tools are revolutionizing the way we write, test, and deploy code — and what it means for the future of software development.",
+            "date": "2026-02-01",
+            "readingTime": "6 min",
+            "tags": [
+                "AI",
+                "Productivity",
+                "Tools"
+            ],
+            "image": "/images/blog-2.jpg",
+            "featured": true
+        },
+        {
+            "id": "tailwind-design-systems",
+            "title": "Creating Design Systems with Tailwind CSS",
+            "excerpt": "How to build a cohesive, scalable design system using Tailwind CSS that keeps your team productive and your UI consistent.",
+            "date": "2026-01-20",
+            "readingTime": "10 min",
+            "tags": [
+                "CSS",
+                "Design",
+                "Tailwind"
+            ],
+            "image": "/images/blog-3.jpg",
+            "featured": false
+        },
+        {
+            "id": "framer-motion-guide",
+            "title": "The Ultimate Guide to Framer Motion Animations",
+            "excerpt": "Master micro-interactions and page transitions with Framer Motion — from basics to advanced spring physics and layout animations.",
+            "date": "2026-01-10",
+            "readingTime": "12 min",
+            "tags": [
+                "Animation",
+                "React",
+                "Framer Motion"
+            ],
+            "image": "/images/blog-4.jpg",
+            "featured": false
+        }
+    ],
+    "about": {
+        "pageLabel": "About Me",
+        "pageTitle": "Turning ideas into",
+        "pageAccent": "digital reality",
+        "bio": "I'm Sheetal Dharshan, a full-stack developer and AI Enthusiast based in India. I specialize in building beautiful, performant web applications that solve real-world problems and delight users.",
+        "values": [
+            {
+                "iconKey": "Code2",
+                "title": "Clean Code",
+                "description": "Writing maintainable, well-documented code that stands the test of time."
+            },
+            {
+                "iconKey": "Palette",
+                "title": "Design-First",
+                "description": "Every feature starts with user experience. Pixel-perfect execution is non-negotiable."
+            },
+            {
+                "iconKey": "Cpu",
+                "title": "Performance",
+                "description": "Optimized for speed. Fast load times, smooth animations, and efficient rendering."
+            },
+            {
+                "iconKey": "Rocket",
+                "title": "Ship Fast",
+                "description": "Rapid iteration with quality. Move fast without breaking things."
+            }
+        ],
+        "timeline": [
+            {
+                "year": "2023",
+                "title": "Started Web Development",
+                "description": "Began my journey into web development, learning React and building passion projects."
+            },
+            {
+                "year": "2024",
+                "title": "Full-Stack Development",
+                "description": "Expanded into backend with Node.js, Python, and databases. Shipped first production apps."
+            },
+            {
+                "year": "2025",
+                "title": "AI & Advanced Tools",
+                "description": "Dove deep into AI integration, building intelligent tools and working with enterprise clients."
+            },
+            {
+                "year": "2026",
+                "title": "Creative Technologist",
+                "description": "Focusing on building premium digital experiences with cutting-edge animations and AI."
+            }
+        ],
+        "personalQuote": "I believe the best technology is invisible — it just works, beautifully. My goal is to create experiences that feel effortless while solving complex problems.",
+        "quoteAuthor": "— Sheetal Dharshan"
+    },
+    "work": {
+        "pageLabel": "Portfolio",
+        "pageTitle": "Selected",
+        "pageAccent": "Works",
+        "description": "A curated collection of projects that showcase my skills in design, development, and problem-solving."
+    },
+    "blog": {
+        "pageLabel": "Blog",
+        "pageTitle": "Thoughts &",
+        "pageAccent": "Insights",
+        "description": "Writing about web development, design patterns, AI, and the tools that make us better developers."
+    },
+    "hireMe": {
+        "pageLabel": "Hire Me",
+        "pageTitle": "Let's build something",
+        "pageAccent": "incredible",
+        "description": "I help startups and businesses bring their ideas to life with modern web technologies, clean code, and stunning design.",
+        "services": [
+            {
+                "iconKey": "Code2",
+                "title": "Web Development",
+                "description": "Custom web applications built with modern frameworks. From SPAs to full-stack platforms.",
+                "features": [
+                    "React / Next.js",
+                    "API Development",
+                    "Database Design",
+                    "Cloud Deployment"
+                ]
+            },
+            {
+                "iconKey": "Palette",
+                "title": "UI/UX Design",
+                "description": "Beautiful, intuitive interfaces that delight users. Design systems and prototyping.",
+                "features": [
+                    "Responsive Design",
+                    "Design Systems",
+                    "Prototyping",
+                    "Animation"
+                ]
+            },
+            {
+                "iconKey": "Cpu",
+                "title": "AI Integration",
+                "description": "Integrating AI and ML capabilities into your products. Smart automation and insights.",
+                "features": [
+                    "LLM Integration",
+                    "Computer Vision",
+                    "Data Analytics",
+                    "Chatbots"
+                ]
+            },
+            {
+                "iconKey": "Globe",
+                "title": "Consulting",
+                "description": "Technical consulting and code reviews. Architecture planning and optimization.",
+                "features": [
+                    "Architecture Review",
+                    "Performance Audit",
+                    "Tech Stack Selection",
+                    "Team Training"
+                ]
+            }
+        ],
+        "processSteps": [
+            {
+                "step": "01",
+                "title": "Discovery",
+                "description": "Understanding your goals, requirements, and vision."
+            },
+            {
+                "step": "02",
+                "title": "Design",
+                "description": "Creating wireframes, prototypes, and visual direction."
+            },
+            {
+                "step": "03",
+                "title": "Development",
+                "description": "Building with clean code, testing, and iteration."
+            },
+            {
+                "step": "04",
+                "title": "Delivery",
+                "description": "Launch, deployment, and ongoing support."
+            }
+        ],
+        "projectTypes": [
+            {
+                "value": "",
+                "label": "Select type"
+            },
+            {
+                "value": "web-app",
+                "label": "Web Application"
+            },
+            {
+                "value": "website",
+                "label": "Website"
+            },
+            {
+                "value": "ai-tool",
+                "label": "AI Integration"
+            },
+            {
+                "value": "consulting",
+                "label": "Consulting"
+            },
+            {
+                "value": "other",
+                "label": "Other"
+            }
+        ],
+        "budgetRanges": [
+            {
+                "value": "",
+                "label": "Select range"
+            },
+            {
+                "value": "1k-5k",
+                "label": "$1,000 - $5,000"
+            },
+            {
+                "value": "5k-10k",
+                "label": "$5,000 - $10,000"
+            },
+            {
+                "value": "10k-25k",
+                "label": "$10,000 - $25,000"
+            },
+            {
+                "value": "25k+",
+                "label": "$25,000+"
+            }
+        ]
+    },
+    "bookACall": {
+        "pageLabel": "Book a Call",
+        "pageTitle": "Let's have a",
+        "pageAccent": "conversation",
+        "description": "Schedule a free call to discuss your project. I'm available in multiple time zones and always happy to chat about ideas.",
+        "callTypes": [
+            {
+                "iconKey": "MessageSquare",
+                "title": "Discovery Call",
+                "duration": "15 min",
+                "description": "Quick intro call to understand your project and see if we're a good fit.",
+                "color": "text-accent"
+            },
+            {
+                "iconKey": "Video",
+                "title": "Strategy Session",
+                "duration": "30 min",
+                "description": "Deep-dive into your project requirements, architecture, and timeline.",
+                "color": "text-primary"
+            },
+            {
+                "iconKey": "Calendar",
+                "title": "Consultation",
+                "duration": "60 min",
+                "description": "Full consultation with technical planning, estimates, and roadmap.",
+                "color": "text-gold"
+            }
+        ],
+        "availability": [
+            {
+                "day": "Monday - Friday",
+                "time": "10:00 AM - 6:00 PM IST",
+                "available": true
+            },
+            {
+                "day": "Saturday",
+                "time": "11:00 AM - 3:00 PM IST",
+                "available": true
+            },
+            {
+                "day": "Sunday",
+                "time": "By appointment",
+                "available": false
+            }
+        ],
+        "timezone": "IST (UTC+5:30)",
+        "calendarPlaceholder": "calendly.com/your-link or cal.com/your-link"
+    },
+    "footer": {
+        "tagline": "Crafting digital experiences that push the boundaries of what's possible on the web.",
+        "copyright": "Sheetal Dharshan",
+        "builtWith": "Built with Next.js, Tailwind CSS & Framer Motion"
+    }
+}

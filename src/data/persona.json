@@ -1,0 +1,106 @@
+{
+    "avatar": "/images/avatar.jpg",
+    "name": "SheetalDharshan A",
+    "tagline": "Full-Stack Developer & AI Enthusiast",
+    "suggestedQuestions": [
+        { "id": "intro", "label": "About Sheetal" },
+        { "id": "skills", "label": "Tech Stack" },
+        { "id": "experience", "label": "Experience" },
+        { "id": "projects", "label": "Projects" },
+        { "id": "hire", "label": "Why Hire?" },
+        { "id": "fun", "label": "Fun Facts" }
+    ],
+    "answers": {
+        "intro": {
+            "en": "Hey there! 👋 I'm **Sheetal**, a full-stack developer who loves building beautiful, performant digital experiences. I specialize in modern web technologies and creating products that users actually enjoy using.",
+            "hi": "नमस्ते! 👋 मैं **शीतल** हूँ, एक फुल-स्टैक डेवलपर जो सुंदर और उच्च प्रदर्शन वाली डिजिटल अनुभव बनाने से प्यार करती है। मैं आधुनिक वेब तकनीकों में विशेषज्ञता रखती हूँ।",
+            "te": "నమస్తే! 👋 నేను **శీతల్**, అందమైన మరియు అధిక పనితీరు గల డిజిటల్ అనుభవాలను రూపొందించడానికి ఇష్టపడే ఫుల్-స్టాక్ డెవలపర్.",
+            "es": "¡Hola! 👋 Soy **Sheetal**, una desarrolladora full-stack apasionada por crear experiencias digitales hermosas y de alto rendimiento.",
+            "fr": "Salut ! 👋 Je suis **Sheetal**, une développeuse full-stack passionnée par la création d'expériences numériques belles et performantes.",
+            "de": "Hallo! 👋 Ich bin **Sheetal**, eine Full-Stack-Entwicklerin, die es liebt, schöne, leistungsstarke digitale Erlebnisse zu schaffen.",
+            "ja": "こんにちは！👋 私は**Sheetal**です。美しくハイパフォーマンスなデジタル体験を構築するのが大好きなフルスタック開発者です。"
+        },
+        "skills": {
+            "en": "Here's what I work with daily:\n\n**Frontend:** React, Next.js, TypeScript, Tailwind CSS, Framer Motion\n**Backend:** Node.js, Python, Express, FastAPI\n**Database:** PostgreSQL, MongoDB, Redis\n**DevOps:** Docker, AWS, Vercel, CI/CD\n**Tools:** Git, Figma, VS Code",
+            "hi": "यहाँ मेरा टेक स्टैक है:\n\n**फ्रंटएंड:** React, Next.js, TypeScript, Tailwind CSS\n**बैकएंड:** Node.js, Python, Express\n**डेटाबेस:** PostgreSQL, MongoDB, Redis\n**DevOps:** Docker, AWS, Vercel",
+            "te": "నా టెక్ స్టాక్:\n\n**ఫ్రంటెండ్:** React, Next.js, TypeScript, Tailwind CSS\n**బ్యాకెండ్:** Node.js, Python, Express\n**డేటాబేస్:** PostgreSQL, MongoDB, Redis",
+            "es": "Mi stack tecnológico:\n\n**Frontend:** React, Next.js, TypeScript, Tailwind CSS\n**Backend:** Node.js, Python, Express\n**Base de datos:** PostgreSQL, MongoDB, Redis",
+            "fr": "Ma stack technique:\n\n**Frontend:** React, Next.js, TypeScript, Tailwind CSS\n**Backend:** Node.js, Python, Express\n**Base de données:** PostgreSQL, MongoDB, Redis",
+            "de": "Mein Tech-Stack:\n\n**Frontend:** React, Next.js, TypeScript, Tailwind CSS\n**Backend:** Node.js, Python, Express\n**Datenbank:** PostgreSQL, MongoDB, Redis",
+            "ja": "技術スタック:\n\n**フロントエンド:** React, Next.js, TypeScript, Tailwind CSS\n**バックエンド:** Node.js, Python, Express\n**データベース:** PostgreSQL, MongoDB, Redis"
+        },
+        "experience": {
+            "en": "I've been building for the web for over **3+ years**, working across startups and freelancing.\n\n🏢 Worked on enterprise SaaS platforms\n🚀 Shipped multiple production apps\n💡 Built AI-powered tools and dashboards\n🌍 Collaborated with teams globally",
+            "hi": "मैं **3+ साल** से वेब डेवलपमेंट कर रही हूं।\n\n🏢 एंटरप्राइज SaaS प्लेटफॉर्म पर काम किया\n🚀 कई प्रोडक्शन ऐप्स शिप किए\n💡 AI-पावर्ड टूल्स बनाए",
+            "te": "నేను **3+ సంవత్సరాలు** వెబ్ కోసం నిర్మిస్తున్నాను.\n\n🏢 ఎంటర్‌ప్రైజ్ SaaS ప్లాట్‌ఫారమ్‌లపై పనిచేశాను\n🚀 బహుళ ప్రొడక్షన్ యాప్‌లను షిప్ చేశాను",
+            "es": "He estado construyendo para la web durante más de **3+ años**.\n\n🏢 Trabajé en plataformas SaaS empresariales\n🚀 Envié múltiples aplicaciones a producción",
+            "fr": "Je construis pour le web depuis plus de **3+ ans**.\n\n🏢 Travaillé sur des plateformes SaaS d'entreprise\n🚀 Livré plusieurs applications en production",
+            "de": "Ich entwickle seit über **3+ Jahren** für das Web.\n\n🏢 Arbeitete an Enterprise-SaaS-Plattformen\n🚀 Mehrere Produktions-Apps ausgeliefert",
+            "ja": "**3年以上**ウェブ開発に携わっています。\n\n🏢 エンタープライズSaaSプラットフォームで作業\n🚀 複数のプロダクションアプリをリリース"
+        },
+        "projects": {
+            "en": "Here are some highlights:\n\n🎵 **Music Streaming App** — Full-stack music player with offline support\n📊 **Analytics Dashboard** — Real-time data visualization platform\n🤖 **AI Document Processor** — Intelligent document extraction tool\n🌐 **E-commerce Platform** — Modern shopping experience with payments\n\nCheck out the [Work](/work) page for more!",
+            "hi": "कुछ मुख्य प्रोजेक्ट्स:\n\n🎵 **म्यूजिक स्ट्रीमिंग ऐप**\n📊 **एनालिटिक्स डैशबोर्ड**\n🤖 **AI डॉक्यूमेंट प्रोसेसर**\n🌐 **ई-कॉमर्स प्लेटफॉर्म**",
+            "te": "కొన్ని ముఖ్యమైన ప్రాజెక్ట్‌లు:\n\n🎵 **మ్యూజిక్ స్ట్రీమింగ్ యాప్**\n📊 **అనలిటిక్స్ డ్యాష్‌బోర్డ్**\n🤖 **AI డాక్యుమెంట్ ప్రాసెసర్**",
+            "es": "Algunos proyectos destacados:\n\n🎵 **App de Streaming Musical**\n📊 **Dashboard de Analytics**\n🤖 **Procesador de Documentos AI**",
+            "fr": "Quelques projets phares:\n\n🎵 **App de Streaming Musical**\n📊 **Dashboard Analytics**\n🤖 **Processeur de Documents IA**",
+            "de": "Einige Highlights:\n\n🎵 **Musik-Streaming-App**\n📊 **Analytics-Dashboard**\n🤖 **AI-Dokumentenverarbeiter**",
+            "ja": "主なプロジェクト:\n\n🎵 **音楽ストリーミングアプリ**\n📊 **アナリティクスダッシュボード**\n🤖 **AIドキュメントプロセッサー**"
+        },
+        "hire": {
+            "en": "Great question! Here's why:\n\n✅ **End-to-end delivery** — From design to deployment\n✅ **Modern stack** — Latest technologies, best practices\n✅ **Quality obsessed** — Pixel-perfect, performant code\n✅ **Strong communicator** — Clear, timely updates\n✅ **Fast learner** — Adapt to any tech stack quickly\n\nReady to start? Visit the [Hire Me](/hire-me) page!",
+            "hi": "बढ़िया सवाल! यहाँ कारण हैं:\n\n✅ **एंड-टू-एंड डिलीवरी**\n✅ **मॉडर्न स्टैक**\n✅ **क्वालिटी पर ध्यान**\n✅ **अच्छा कम्युनिकेशन**",
+            "te": "మంచి ప్రశ్న! ఇక్కడ కారణాలు:\n\n✅ **ఎండ్-టు-ఎండ్ డెలివరీ**\n✅ **మోడర్న్ స్టాక్**\n✅ **నాణ్యతపై దృష్టి**",
+            "es": "¡Excelente pregunta!\n\n✅ **Entrega de punta a punta**\n✅ **Stack moderno**\n✅ **Obsesionada con la calidad**",
+            "fr": "Excellente question!\n\n✅ **Livraison de bout en bout**\n✅ **Stack moderne**\n✅ **Obsédée par la qualité**",
+            "de": "Gute Frage!\n\n✅ **End-to-End-Lieferung**\n✅ **Moderner Stack**\n✅ **Qualitätsbewusst**",
+            "ja": "いい質問です！\n\n✅ **エンドツーエンドのデリバリー**\n✅ **モダンスタック**\n✅ **品質へのこだわり**"
+        },
+        "fun": {
+            "en": "Some fun facts about me:\n\n🎮 I debug better with lo-fi music playing\n☕ Powered by an unhealthy amount of chai\n🌙 Night owl — my best code happens after midnight\n📚 Currently reading about system design & AI\n🎯 Goal: Build products that make people smile",
+            "hi": "कुछ मजेदार तथ्य:\n\n🎮 Lo-fi म्यूजिक के साथ बेहतर डिबग करती हूं\n☕ चाय से चलती हूं\n🌙 रात की उल्लू — बेस्ट कोड आधी रात के बाद",
+            "te": "కొన్ని ఆసక్తికరమైన విషయాలు:\n\n🎮 Lo-fi మ్యూజిక్‌తో బెటర్ డీబగ్ చేస్తాను\n☕ చాయ్‌తో నడుస్తాను\n🌙 నైట్ ఔల్",
+            "es": "Datos curiosos:\n\n🎮 Debuggo mejor con música lo-fi\n☕ Funciono con una cantidad insana de chai\n🌙 Ave nocturna",
+            "fr": "Quelques faits amusants:\n\n🎮 Je débogue mieux avec de la musique lo-fi\n☕ Alimentée par une quantité malsaine de chai\n🌙 Oiseau de nuit",
+            "de": "Lustige Fakten:\n\n🎮 Ich debugge besser mit Lo-fi-Musik\n☕ Angetrieben von einer ungesunden Menge Chai\n🌙 Nachteule",
+            "ja": "面白い事実:\n\n🎮 Lo-fi音楽でデバッグが捗る\n☕ チャイで動いてます\n🌙 夜型人間"
+        }
+    },
+    "languages": [
+        {
+            "code": "en",
+            "label": "English",
+            "flag": "🇺🇸"
+        },
+        {
+            "code": "hi",
+            "label": "हिंदी",
+            "flag": "🇮🇳"
+        },
+        {
+            "code": "te",
+            "label": "తెలుగు",
+            "flag": "🇮🇳"
+        },
+        {
+            "code": "es",
+            "label": "Español",
+            "flag": "🇪🇸"
+        },
+        {
+            "code": "fr",
+            "label": "Français",
+            "flag": "🇫🇷"
+        },
+        {
+            "code": "de",
+            "label": "Deutsch",
+            "flag": "🇩🇪"
+        },
+        {
+            "code": "ja",
+            "label": "日本語",
+            "flag": "🇯🇵"
+        }
+    ]
+}
