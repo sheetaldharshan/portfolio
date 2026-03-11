@@ -5,6 +5,7 @@ import { Send, ExternalLink, Sun, Moon, House, Search, ArrowUpLeft, ArrowUpRight
 import { cn } from "@/lib/utils";
 import persona from "@/data/persona.json";
 import { BorderBeam } from "@/components/ui/border-beam";
+import { ShineBorder } from "@/registry/magicui/shine-border";
 import { Spinner } from "@/components/ui/spinner";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
@@ -197,7 +198,7 @@ export const ChatBot = ({ isHeroVariant = false }: ChatBotProps) => {
     const [iframeReloadKey, setIframeReloadKey] = useState(0);
     const [isXlViewport, setIsXlViewport] = useState(false);
     const [browserDarkMode, setBrowserDarkMode] = useState(true);
-    const [rightPanelWidth, setRightPanelWidth] = useState(450);
+    const [rightPanelWidth, setRightPanelWidth] = useState(530);
     const [isResizingRightPanel, setIsResizingRightPanel] = useState(false);
     const [isMiddleScrollEnabled, setIsMiddleScrollEnabled] = useState(false);
     const [isRightPanelHeaderVisible, setIsRightPanelHeaderVisible] = useState(true);
@@ -813,12 +814,18 @@ export const ChatBot = ({ isHeroVariant = false }: ChatBotProps) => {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 className={cn(
-                    "relative overflow-hidden flex flex-col rounded-3xl border border-foreground/[0.08] bg-background/40 backdrop-blur-xl shadow-2xl min-h-0",
+                    "relative overflow-hidden flex flex-col rounded-3xl border-2 border-[#A07CFE]/70 bg-background/40 backdrop-blur-xl shadow-2xl shadow-[#A07CFE]/20 min-h-0",
                     isHeroVariant ? "flex-1" : "shadow-primary/5"
                 )}
             >
                 {/* Visual Accent - Top Beam */}
                 <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent z-50" />
+
+                <ShineBorder
+                    borderWidth={3}
+                    duration={14}
+                    shineColor="#A07CFE"
+                />
 
                 {!isHeroVariant && <BorderBeam size={350} duration={15} delay={5} colorFrom="#a855f7" colorTo="#06b6d4" />}
 
@@ -850,7 +857,7 @@ export const ChatBot = ({ isHeroVariant = false }: ChatBotProps) => {
                         </div>
 
                         <div
-                            className="grid flex-1 min-h-0 h-0 grid-cols-1 lg:grid-cols-[260px_minmax(0,1fr)] xl:[grid-template-columns:260px_minmax(0,1fr)_var(--chat-right-width)]"
+                            className="grid flex-1 min-h-0 h-0 grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)] xl:[grid-template-columns:250px_minmax(0,1fr)_var(--chat-right-width)]"
                             style={heroGridStyle}
                         >
                         <aside className="hidden lg:flex flex-col border-r border-foreground/[0.08] bg-[hsl(var(--muted)/0.3)]">
@@ -906,7 +913,7 @@ export const ChatBot = ({ isHeroVariant = false }: ChatBotProps) => {
                                     onMouseLeave={() => setIsMiddleScrollEnabled(false)}
                                     className="chat-middle-scroll flex-1 min-h-0 h-0 overflow-y-auto overscroll-contain touch-pan-y px-3 py-4 md:px-5 md:py-6 scroll-smooth"
                                 >
-                                    <div className="mx-auto flex w-full max-w-[700px] flex-col gap-2.5 pb-4 pt-2">
+                                    <div className="mx-auto flex w-full max-w-[720px] flex-col gap-2.5 pb-4 pt-2">
                                         <AnimatePresence mode="popLayout" initial={false}>
                                             {messages.map((msg) => (
                                                 <motion.div
@@ -1126,7 +1133,7 @@ export const ChatBot = ({ isHeroVariant = false }: ChatBotProps) => {
                                 onMouseLeave={() => setIsMiddleScrollEnabled(false)}
                                 className="chat-middle-scroll h-[420px] overflow-y-auto overscroll-contain px-3 py-4 md:h-[460px] md:px-5 md:py-6 scroll-smooth"
                             >
-                                <div className="mx-auto flex w-full max-w-[700px] flex-col gap-2.5 pb-4 pt-2">
+                                <div className="mx-auto flex w-full max-w-[720px] flex-col gap-2.5 pb-4 pt-2">
                             <AnimatePresence mode="popLayout" initial={false}>
                                 {messages.map((msg) => (
                                     <motion.div

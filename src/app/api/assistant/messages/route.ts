@@ -184,47 +184,68 @@ export async function POST(request: Request) {
     let assistantMessage = null;
 
     if (senderRole === "visitor" && conversation.status === "ai_active" && !skipAiResponse) {
-      const { data: history } = await supabaseServer
-        .from("assistant_messages")
-        .select("sender_role, content")
-        .eq("conversation_id", conversationId)
-        .order("created_at", { ascending: true })
-        .limit(14);
+      try {
+        const { data: history } = await supabaseServer
+          .from("assistant_messages")
+          .select("sender_role, content")
+          .eq("conversation_id", conversationId)
+          .order("created_at", { ascending: true })
+          .limit(14);
 
-      const mappedHistory = (history || []).map((item) => ({
-        role: (item.sender_role === "visitor" ? "user" : "assistant") as "user" | "assistant",
-        content: item.content,
-      }));
+        const mappedHistory = (history || []).map((item) => ({
+          role: (item.sender_role === "visitor" ? "user" : "assistant") as "user" | "assistant",
+          content: item.content,
+        }));
 
-      const completion = await groq.chat.completions.create({
-        messages: [{ role: "system" as const, content: buildAssistantPrompt(language) }, ...mappedHistory],
-        model: GROQ_CHAT_MODEL,
-        temperature: 0.6,
-        max_tokens: GROQ_MAX_TOKENS,
-      });
+        const completion = await groq.chat.completions.create({
+          messages: [{ role: "system" as const, content: buildAssistantPrompt(language) }, ...mappedHistory],
+          model: GROQ_CHAT_MODEL,
+          temperature: 0.6,
+          max_tokens: GROQ_MAX_TOKENS,
+        });
 
-      const aiContent = completion.choices[0]?.message?.content?.trim() || "I am here. Could you share a bit more detail?";
+        const aiContent = completion.choices[0]?.message?.content?.trim() || "I am here. Could you share a bit more detail?";
 
-      const { data: aiInserted } = await supabaseServer
-        .from("assistant_messages")
-        .insert([
-          {
-            conversation_id: conversationId,
-            sender_role: "assistant",
-            sender_label: "SheetalDharshan Assistant",
-            content: aiContent,
-            attachments: [],
-          },
-        ])
-        .select("*")
-        .single();
+        const { data: aiInserted } = await supabaseServer
+          .from("assistant_messages")
+          .insert([
+            {
+              conversation_id: conversationId,
+              sender_role: "assistant",
+              sender_label: "SheetalDharshan Assistant",
+              content: aiContent,
+              attachments: [],
+            },
+          ])
+          .select("*")
+          .single();
 
-      assistantMessage = aiInserted || null;
+        assistantMessage = aiInserted || null;
 
-      await supabaseServer
-        .from("assistant_conversations")
-        .update({ last_message_at: new Date().toISOString() })
-        .eq("id", conversationId);
+        await supabaseServer
+          .from("assistant_conversations")
+          .update({ last_message_at: new Date().toISOString() })
+          .eq("id", conversationId);
+      } catch (aiError) {
+        console.error("assistant ai response error", aiError);
+
+        const fallbackContent = "I received your message. Please give me a moment while I prepare the best response.";
+        const { data: fallbackInserted } = await supabaseServer
+          .from("assistant_messages")
+          .insert([
+            {
+              conversation_id: conversationId,
+              sender_role: "assistant",
+              sender_label: "SheetalDharshan Assistant",
+              content: fallbackContent,
+              attachments: [],
+            },
+          ])
+          .select("*")
+          .single();
+
+        assistantMessage = fallbackInserted || null;
+      }
 
     }
 

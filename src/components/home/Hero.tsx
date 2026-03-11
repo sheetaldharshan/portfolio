@@ -6,11 +6,11 @@ import { Logo } from "@/components/ui/Logo";
 
 export const Hero = () => {
     return (
-        <section className="ref-hero relative min-h-[72vh] md:min-h-[82vh] flex flex-col items-center justify-start overflow-hidden bg-transparent">
+        <section className="ref-hero relative min-h-[82vh] md:min-h-[92vh] flex flex-col items-center justify-start overflow-hidden bg-transparent">
 
 
             {/* Content */}
-            <div className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-6 flex flex-col items-center justify-start min-h-0">
+            <div className="relative z-10 w-full max-w-[1450px] mx-auto px-4 md:px-6 flex flex-col items-center justify-start min-h-0">
                 <div className="w-full pt-4 md:pt-8 pb-6 min-h-0">
                     <div className="flex flex-col gap-4 md:gap-6 min-h-0">
                         <motion.h2

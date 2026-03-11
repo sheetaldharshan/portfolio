@@ -42,7 +42,14 @@ const CONVERSATION_KEY = "sd_assistant_conversation";
 const VISITOR_NAME_KEY = "sd_assistant_visitor_name";
 const VISITOR_EMAIL_KEY = "sd_assistant_visitor_email";
 const VISITOR_PROFILE_CONFIRMED_KEY = "sd_assistant_profile_confirmed";
+const WIDGET_SIZE_KEY = "sd_assistant_widget_size_v1";
 const NAVIGATION_COMMAND_PATTERN = /\[\[(open|scroll):([^\]]+)\]\]/gi;
+const DEFAULT_WIDGET_WIDTH = 338;
+const DEFAULT_WIDGET_HEIGHT = 560;
+const MIN_WIDGET_WIDTH = 300;
+const MIN_WIDGET_HEIGHT = 380;
+const VIEWPORT_MARGIN_X = 24;
+const VIEWPORT_MARGIN_Y = 88;
 
 const isValidEmail = (value: string) => /^(?:[a-zA-Z0-9_'^&+%\-/=?`{|}~.!#$*])+@(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/.test(value);
 
@@ -259,10 +266,38 @@ export const SiteAssistantWidget = () => {
   const [isProfileConfirmed, setIsProfileConfirmed] = useState(false);
   const [navigationNotice, setNavigationNotice] = useState<string | null>(null);
   const [pendingNavigationTarget, setPendingNavigationTarget] = useState<AssistantIntentTarget | null>(null);
+  const [widgetSize, setWidgetSize] = useState({ width: DEFAULT_WIDGET_WIDTH, height: DEFAULT_WIDGET_HEIGHT });
+  const [isResizing, setIsResizing] = useState(false);
+  const [resizeCursor, setResizeCursor] = useState<"nesw-resize" | "nwse-resize">("nesw-resize");
   const widgetRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const latestMessageIdRef = useRef<string | null>(null);
   const latestOperatorNavigationIdRef = useRef<string | null>(null);
+  const resizeStartRef = useRef<{ x: number; y: number; width: number; height: number } | null>(null);
+  const resizePointerIdRef = useRef<number | null>(null);
+  const resizeDirectionRef = useRef<{ x: 1 | -1; y: 1 | -1 }>({ x: -1, y: -1 });
+
+  const getMaxWidgetSize = useCallback(() => {
+    if (typeof window === "undefined") {
+      return { width: DEFAULT_WIDGET_WIDTH, height: DEFAULT_WIDGET_HEIGHT };
+    }
+
+    return {
+      width: Math.max(MIN_WIDGET_WIDTH, window.innerWidth - VIEWPORT_MARGIN_X),
+      height: Math.max(MIN_WIDGET_HEIGHT, window.innerHeight - VIEWPORT_MARGIN_Y),
+    };
+  }, []);
+
+  const clampWidgetSize = useCallback(
+    (nextWidth: number, nextHeight: number) => {
+      const maxSize = getMaxWidgetSize();
+      return {
+        width: Math.min(maxSize.width, Math.max(MIN_WIDGET_WIDTH, nextWidth)),
+        height: Math.min(maxSize.height, Math.max(MIN_WIDGET_HEIGHT, nextHeight)),
+      };
+    },
+    [getMaxWidgetSize]
+  );
 
   const handleEditProfile = () => {
     setIsEditingProfile(true);
@@ -310,6 +345,23 @@ export const SiteAssistantWidget = () => {
         created_at: new Date().toISOString(),
       },
     ]);
+  }, []);
+
+  const isLocalVisitorSynced = useCallback((localMessage: AssistantMessage, serverMessages: AssistantMessage[]) => {
+    if (localMessage.sender_role !== "visitor") return false;
+    const localContent = (localMessage.content || "").trim();
+    if (!localContent) return false;
+
+    const localCreatedAt = new Date(localMessage.created_at).getTime();
+    return serverMessages.some((serverMessage) => {
+      if (serverMessage.sender_role !== "visitor") return false;
+      if ((serverMessage.content || "").trim() !== localContent) return false;
+
+      const serverCreatedAt = new Date(serverMessage.created_at).getTime();
+      if (!Number.isFinite(localCreatedAt) || !Number.isFinite(serverCreatedAt)) return true;
+
+      return Math.abs(serverCreatedAt - localCreatedAt) <= 3 * 60 * 1000;
+    });
   }, []);
 
   const classifyNavigationConfirmation = useCallback(async (message: string) => {
@@ -412,7 +464,10 @@ export const SiteAssistantWidget = () => {
 
         setMessages((prev) => {
           const localTransient = prev.filter(
-            (item) => item.id.startsWith("local-assistant-") || item.id.startsWith("local-system-")
+            (item) =>
+              item.id.startsWith("local-assistant-") ||
+              item.id.startsWith("local-system-") ||
+              item.id.startsWith("local-visitor-")
           );
 
           if (localTransient.length === 0) {
@@ -420,14 +475,20 @@ export const SiteAssistantWidget = () => {
           }
 
           const serverIds = new Set(nextMessages.map((item) => item.id));
-          const stillLocal = localTransient.filter((item) => !serverIds.has(item.id));
+          const stillLocal = localTransient.filter((item) => {
+            if (serverIds.has(item.id)) return false;
+            if (item.id.startsWith("local-visitor-")) {
+              return !isLocalVisitorSynced(item, nextMessages);
+            }
+            return true;
+          });
           return [...nextMessages, ...stillLocal].sort(byCreatedAtAsc);
         });
       } catch {
         // Ignore fetch errors and continue polling.
       }
     },
-    [isOpen, navigateForIntent]
+    [isLocalVisitorSynced, isOpen, navigateForIntent]
   );
 
   const ensureConversation = useCallback(
@@ -472,6 +533,100 @@ export const SiteAssistantWidget = () => {
       window.removeEventListener("offline", markOffline);
     };
   }, []);
+
+  useEffect(() => {
+    try {
+      const storedSize = localStorage.getItem(WIDGET_SIZE_KEY);
+      if (!storedSize) return;
+
+      const parsed = JSON.parse(storedSize) as { width?: unknown; height?: unknown };
+      const nextWidth = typeof parsed.width === "number" ? parsed.width : DEFAULT_WIDGET_WIDTH;
+      const nextHeight = typeof parsed.height === "number" ? parsed.height : DEFAULT_WIDGET_HEIGHT;
+      setWidgetSize(clampWidgetSize(nextWidth, nextHeight));
+    } catch {
+      // Ignore malformed local storage values.
+    }
+  }, [clampWidgetSize]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(WIDGET_SIZE_KEY, JSON.stringify(widgetSize));
+    } catch {
+      // Ignore storage write errors.
+    }
+  }, [widgetSize]);
+
+  useEffect(() => {
+    const syncSizeToViewport = () => {
+      setWidgetSize((prev) => clampWidgetSize(prev.width, prev.height));
+    };
+
+    syncSizeToViewport();
+    window.addEventListener("resize", syncSizeToViewport);
+    return () => {
+      window.removeEventListener("resize", syncSizeToViewport);
+    };
+  }, [clampWidgetSize]);
+
+  useEffect(() => {
+    if (!isResizing) return;
+
+    const handlePointerMove = (event: PointerEvent) => {
+      if (resizePointerIdRef.current !== null && event.pointerId !== resizePointerIdRef.current) {
+        return;
+      }
+
+      const start = resizeStartRef.current;
+      if (!start) return;
+
+      const nextWidth = start.width + (event.clientX - start.x) * resizeDirectionRef.current.x;
+      const nextHeight = start.height + (event.clientY - start.y) * resizeDirectionRef.current.y;
+      setWidgetSize(clampWidgetSize(nextWidth, nextHeight));
+    };
+
+    const handlePointerUp = () => {
+      setIsResizing(false);
+      resizeStartRef.current = null;
+      resizePointerIdRef.current = null;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+
+    document.body.style.cursor = resizeCursor;
+    document.body.style.userSelect = "none";
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
+    window.addEventListener("pointercancel", handlePointerUp);
+
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+  }, [clampWidgetSize, isResizing, resizeCursor]);
+
+  const handleResizeStart = (
+    event: React.PointerEvent<HTMLButtonElement>,
+    cursor: "nesw-resize" | "nwse-resize",
+    direction: { x: 1 | -1; y: 1 | -1 }
+  ) => {
+    event.preventDefault();
+    event.stopPropagation();
+    resizePointerIdRef.current = event.pointerId;
+    setResizeCursor(cursor);
+    resizeDirectionRef.current = direction;
+
+    resizeStartRef.current = {
+      x: event.clientX,
+      y: event.clientY,
+      width: widgetSize.width,
+      height: widgetSize.height,
+    };
+
+    setIsResizing(true);
+  };
 
   useEffect(() => {
     const storedSession = localStorage.getItem(VISITOR_SESSION_KEY) || makeVisitorSessionId();
@@ -614,13 +769,18 @@ export const SiteAssistantWidget = () => {
       if (response.ok) {
         const data = await response.json();
         const persistedMessages = [data?.message, data?.assistantMessage].filter(Boolean) as AssistantMessage[];
-        setMessages((prev) => [...prev.filter((item) => item.id !== optimisticVisitorMessage.id), ...persistedMessages]);
+        setMessages((prev) => {
+          if (persistedMessages.length === 0) {
+            return prev;
+          }
+          return [...prev.filter((item) => item.id !== optimisticVisitorMessage.id), ...persistedMessages].sort(byCreatedAtAsc);
+        });
         setPendingAttachments([]);
       } else {
-        setMessages((prev) => prev.filter((item) => item.id !== optimisticVisitorMessage.id));
+        pushLocalAssistantMessage("I am syncing that message now. If the response is delayed, it will appear shortly.");
       }
     } catch {
-      setMessages((prev) => prev.filter((item) => item.id !== optimisticVisitorMessage.id));
+      pushLocalAssistantMessage("Network seems slow right now. Your message is kept and will sync automatically.");
     } finally {
       setIsSending(false);
     }
@@ -692,7 +852,16 @@ export const SiteAssistantWidget = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.96 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="mb-3 ml-auto flex max-h-[min(78svh,560px)] w-[calc(100vw-1.5rem)] max-w-[338px] flex-col overflow-hidden rounded-[26px] border border-foreground/10 bg-background/95 shadow-[0_18px_48px_rgba(0,0,0,0.32)] backdrop-blur-xl sm:w-[calc(100vw-2rem)]"
+            style={{
+              width: widgetSize.width,
+              height: widgetSize.height,
+              maxWidth: "calc(100vw - 1.5rem)",
+              maxHeight: "calc(100svh - 5.5rem)",
+            }}
+            className={cn(
+              "relative mb-3 ml-auto flex flex-col overflow-hidden rounded-[26px] border border-foreground/10 bg-background/95 shadow-[0_18px_48px_rgba(0,0,0,0.32)] backdrop-blur-xl",
+              isResizing && "select-none"
+            )}
           >
             <div className="flex items-center justify-between border-b border-foreground/10 px-3.5 py-2.5">
               <div className="flex items-center gap-2">
@@ -899,6 +1068,16 @@ export const SiteAssistantWidget = () => {
                 </div>
               </>
             )}
+
+            <button
+              type="button"
+              onPointerDown={(event) => handleResizeStart(event, "nwse-resize", { x: -1, y: -1 })}
+              className="absolute left-2 top-2 z-10 flex h-4 w-4 touch-none items-center justify-center rounded-md border border-foreground/15 bg-background/75 text-foreground/55 transition-colors hover:border-foreground/25 hover:text-foreground cursor-nwse-resize"
+              aria-label="Resize assistant from top"
+              title="Drag to resize"
+            >
+              <span className="pointer-events-none text-[8px] leading-none">↖</span>
+            </button>
           </motion.div>
         )}
       </AnimatePresence>
